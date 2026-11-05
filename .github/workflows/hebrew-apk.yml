@@ -1,0 +1,71 @@
+name: Hebrew APK
+
+# Builds the Hebrew branch and publishes the debug APK as a pre-release on this fork,
+# so it can be downloaded without signing in. Push to `hebrew`, or push a `hebrew-*` tag.
+on:
+  push:
+    branches: [hebrew]
+    tags: ['hebrew-*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hebrew-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    name: Build and publish Hebrew APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          cache-provider: basic
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+      - name: Install Android platform
+        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+      - name: Build debug APK and run unit tests
+        run: ./gradlew --no-daemon :app:assembleDebug :app:testDebugUnitTest
+      - name: Name the APK
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk Waypoint-Hebrew.apk
+          sha256sum Waypoint-Hebrew.apk > Waypoint-Hebrew.apk.sha256
+      - name: Publish pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          RUN_NUMBER: ${{ github.run_number }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ "$REF_TYPE" = tag ]; then tag="$REF_NAME"; else tag="hebrew-build-$RUN_NUMBER"; fi
+          gh release create "$tag" Waypoint-Hebrew.apk Waypoint-Hebrew.apk.sha256 \
+            --repo "$GITHUB_REPOSITORY" --target "$SHA" --prerelease \
+            --title "Waypoint Hebrew (debug build $RUN_NUMBER)" \
+            --notes "Debug build of the hebrew branch at $SHA. Uninstall other Waypoint builds before installing; each build has its own debug signature."
+      - name: Lint (informational)
+        if: always()
+        continue-on-error: true
+        run: ./gradlew --no-daemon :app:lintDebug
+      - name: Save test and lint reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: hebrew-reports
+          path: |
+            app/build/reports/tests/
+            app/build/reports/lint-results-debug.*
+          if-no-files-found: ignore
+          retention-days: 14
