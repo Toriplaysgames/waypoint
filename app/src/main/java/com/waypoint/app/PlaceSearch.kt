@@ -133,11 +133,11 @@ class PlaceSearch(private val primary:PlaceSearchProvider,private val fallback:P
                 }
             } catch(e:CancellationException){throw e} catch(_:Exception){failures++}
         }
-        lookup(primary,providerQuery(variants.first()))
+        lookup(primary,PlaceMatcher.providerQuery(variants.first()))
         val primaryMatches=PlaceMatcher.ranked(effectiveQuery,near,candidates)
         if(fallback!=null && (expanded || primaryMatches.none{PlaceMatcher.score(effectiveQuery,it)>=.88})) {
-            lookup(fallback,providerQuery(variants.first()))
-            if(variants.size>1 && PlaceMatcher.ranked(effectiveQuery,near,candidates).isEmpty())lookup(fallback,providerQuery(variants.last()))
+            lookup(fallback,PlaceMatcher.providerQuery(variants.first()))
+            if(variants.size>1 && PlaceMatcher.ranked(effectiveQuery,near,candidates).isEmpty())lookup(fallback,PlaceMatcher.providerQuery(variants.last()))
         }
         val results=PlaceMatcher.ranked(effectiveQuery,near,candidates)
         // Saved/recent matches are supplied afresh: deleting one must not leave a cached copy.
