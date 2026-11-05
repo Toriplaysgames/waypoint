@@ -34,3 +34,6 @@ internal fun feedbackIssueUrl(
 }
 
 private fun encodeIssueField(value: String): String = URLEncoder.encode(value, "UTF-8")
+
+/** The issue body stays in English for maintainers; the chooser shows the app language. */
+internal val FeedbackKind.localLabel: String get() = tr(label, when (this) { FeedbackKind.BUG -> "באג"; FeedbackKind.IDEA -> "רעיון"; FeedbackKind.OTHER -> "אחר" })

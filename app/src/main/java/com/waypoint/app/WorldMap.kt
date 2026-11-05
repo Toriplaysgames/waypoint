@@ -102,7 +102,7 @@ fun WorldMap(state: NavState, onPin: (Place)->Unit, onMapError: (String?)->Unit,
         onDispose { owner.lifecycle.removeObserver(observer);globeAnimator[0]?.cancel();globeAnimator[0]=null }
     }
     AndroidView(factory={mapView.apply {
-        addOnDidFailLoadingMapListener { currentError("Map couldn't load. Check your internet connection.") }
+        addOnDidFailLoadingMapListener { currentError(tr("Map couldn't load. Check your internet connection.","לא הצלחנו לטעון את המפה. בדקו את החיבור לאינטרנט.")) }
         getMapAsync { m ->
             map=m; m.uiSettings.apply {
                 isCompassEnabled=false; isLogoEnabled=false; isAttributionEnabled=false
@@ -115,7 +115,7 @@ fun WorldMap(state: NavState, onPin: (Place)->Unit, onMapError: (String?)->Unit,
             } }
             m.addOnCameraIdleListener { if(followPolicy.gestureEnded(SystemClock.elapsedRealtime()))followTick++ }
             m.addOnMapLongClickListener { point ->
-                if(!currentState.navigating) currentPin(Place("pin:${point.latitude},${point.longitude}","Dropped pin","%.5f, %.5f".format(point.latitude,point.longitude),Coordinate(point.latitude,point.longitude)))
+                if(!currentState.navigating) currentPin(Place("pin:${point.latitude},${point.longitude}",tr("Dropped pin","נעץ במפה"),"%.5f, %.5f".format(point.latitude,point.longitude),Coordinate(point.latitude,point.longitude)))
                 true
             }
             m.addOnMapClickListener { point ->
@@ -123,7 +123,7 @@ fun WorldMap(state: NavState, onPin: (Place)->Unit, onMapError: (String?)->Unit,
                 val named=features.firstOrNull { f -> f.geometry() is Point && safeMapFeatureText(runCatching { f.getStringProperty("name") }.getOrNull()) != null }
                 if(named!=null && !currentState.navigating) {
                     val p=named.geometry() as Point
-                    val name=safeMapFeatureText(runCatching { named.getStringProperty("name") }.getOrNull()) ?: return@addOnMapClickListener false
+                    val name=safeMapFeatureText(runCatching { if(AppLanguage.isHebrew && named.hasProperty("name:he")) named.getStringProperty("name:he") else named.getStringProperty("name") }.getOrNull()) ?: return@addOnMapClickListener false
                     val rawKind=when {
                         named.hasProperty("subclass") -> runCatching { named.getStringProperty("subclass") }.getOrNull()
                         named.hasProperty("class") -> runCatching { named.getStringProperty("class") }.getOrNull()
@@ -145,7 +145,7 @@ fun WorldMap(state: NavState, onPin: (Place)->Unit, onMapError: (String?)->Unit,
         val requestedWorld=state.world
         val requestedEpoch=styleEpoch[0]
         val (json,images)=withContext(Dispatchers.Default) {
-            val source=context.assets.open("styles/${styleFileOverride ?: requestedWorld.file}.json").bufferedReader().use{it.readText()}
+            val source=MapLabels.localize(context.assets.open("styles/${styleFileOverride ?: requestedWorld.file}.json").bufferedReader().use{it.readText()})
             val prepared=HashMap<String,Bitmap>(20).apply {
                 put("nav-arrow",mapPlayer(requestedWorld))
                 put("vehicle-car",mapVehicle(requestedWorld,TravelMode.CAR))
@@ -168,7 +168,7 @@ fun WorldMap(state: NavState, onPin: (Place)->Unit, onMapError: (String?)->Unit,
             val world=requestedWorld
             val art=world.mapArt()
             style.addImages(images)
-            val poiLabel=step(zoom(),literal(""),stop(17.2,coalesce(get("name:en"),get("name_en"),get("name"))))
+            val poiLabel=step(zoom(),literal(""),stop(17.2,if(AppLanguage.isHebrew)coalesce(get("name:he"),get("name:en"),get("name_en"),get("name")) else coalesce(get("name:en"),get("name_en"),get("name"))))
             val poiIcon=switchCase(
                 any(eq(get("class"),literal("school")),eq(get("class"),literal("college")),eq(get("class"),literal("university")),eq(get("class"),literal("kindergarten"))),literal("poi-education"),
                 any(eq(get("class"),literal("bar")),eq(get("class"),literal("beer")),eq(get("subclass"),literal("pub"))),literal("poi-pub"),

@@ -85,23 +85,39 @@ data class AtlasActions(val search:()->Unit,val huds:()->Unit,val saved:()->Unit
 @Composable internal fun AtlasText(text:String,world:World,modifier:Modifier=Modifier,size:Int=16,color:Color=hudPalette(world).foreground,font:FontFamily=hudFont(world)) {
     Text(text,modifier,fontFamily=font,fontSize=size.sp,lineHeight=(size+4).sp,color=color,maxLines=1,overflow=TextOverflow.Ellipsis)
 }
-internal fun atlasToolCaption(label:String)=when(label) {
-    "Set a destination"->"Search"
-    "Use my location"->"Locate"
-    "Toggle 2D and 3D"->"Map tilt"
-    "Find fuel"->"Fuel"
-    "Find food"->"Food"
-    "Close route preview"->"Back"
-    "Mute guidance"->"Mute"
-    "Unmute guidance"->"Sound on"
+/** Atlas tools receive English labels as keys; these give the spoken label in the app language. */
+internal fun atlasToolLabel(label:String)=tr(label,when(label) {
+    "Set a destination"->"בחירת יעד"
+    "Use my location"->"שימוש במיקום שלי"
+    "Toggle 2D and 3D"->"מעבר בין דו־ממד לתלת־ממד"
+    "Find fuel"->"חיפוש דלק"
+    "Find food"->"חיפוש אוכל"
+    "Close route preview"->"סגירת התצוגה המקדימה של המסלול"
+    "Mute guidance"->"השתקת ההנחיות"
+    "Unmute guidance"->"ביטול השתקת ההנחיות"
+    "Worlds"->"עולמות"
+    "Saved"->"שמורים"
+    "Settings"->"הגדרות"
+    "Locate"->"איתור"
     else->label
+})
+internal fun atlasToolCaption(label:String)=when(label) {
+    "Set a destination"->tr("Search","חיפוש")
+    "Use my location"->tr("Locate","איתור")
+    "Toggle 2D and 3D"->tr("Map tilt","הטיה")
+    "Find fuel"->tr("Fuel","דלק")
+    "Find food"->tr("Food","אוכל")
+    "Close route preview"->tr("Back","חזרה")
+    "Mute guidance"->tr("Mute","השתקה")
+    "Unmute guidance"->tr("Sound on","קול")
+    else->atlasToolLabel(label)
 }
 @Composable internal fun AtlasTool(world:World,icon:ImageVector,label:String,action:()->Unit,modifier:Modifier=Modifier,light:Boolean=false,round:Boolean=false) {
     val p=hudPalette(world)
     val background=if(light)p.foreground else p.panel
     val foreground=if(light)p.panel else p.foreground
     val shape=if(round)CircleShape else hudShape(world)
-    Column(modifier.padding(4.dp).width(64.dp).heightIn(min=70.dp).clickable(role=Role.Button,onClick=action).semantics(mergeDescendants=true){contentDescription=label},horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(3.dp)) {
+    Column(modifier.padding(4.dp).width(64.dp).heightIn(min=70.dp).clickable(role=Role.Button,onClick=action).semantics(mergeDescendants=true){contentDescription=atlasToolLabel(label)},horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(3.dp)) {
         Surface(color=background,contentColor=foreground,shape=shape,modifier=Modifier.size(48.dp),border=if(round)BorderStroke(1.dp,foreground) else hudBorder(world)) {
             Box(contentAlignment=Alignment.Center){Icon(icon,null,Modifier.size(21.dp))}
         }
@@ -118,7 +134,7 @@ internal fun atlasToolCaption(label:String)=when(label) {
 @Composable internal fun AtlasTabs(world:World,a:AtlasActions,modifier:Modifier=Modifier,activeColor:Color=hudPalette(world).foreground) {
     val p=hudPalette(world)
     Row(modifier.fillMaxWidth().height(IntrinsicSize.Min).background(p.panel),verticalAlignment=Alignment.CenterVertically) {
-        listOf("MAP" to a.locate,"Worlds" to a.huds,"Saved" to a.saved).forEachIndexed { i,(t,fn)->
+        listOf(tr("MAP","מפה") to a.locate,tr("Worlds","עולמות") to a.huds,tr("Saved","שמורים") to a.saved).forEachIndexed { i,(t,fn)->
             Box(Modifier.weight(1f).fillMaxHeight().heightIn(min=56.dp).background(if(i==0)activeColor else Color.Transparent).clickable(onClick=fn).padding(horizontal=4.dp,vertical=12.dp),contentAlignment=Alignment.Center) {
                 AtlasText(t,world,size=14,color=if(i==0)p.panel else p.foreground)
             }
@@ -127,17 +143,17 @@ internal fun atlasToolCaption(label:String)=when(label) {
 
     }
 }
-@Composable internal fun AtlasFind(world:World,a:AtlasActions,modifier:Modifier=Modifier,label:String="Search places") {
+@Composable internal fun AtlasFind(world:World,a:AtlasActions,modifier:Modifier=Modifier,label:String=tr("Search places","חיפוש מקומות")) {
     val p=hudPalette(world)
-    Surface(onClick=a.search,modifier=modifier.padding(4.dp).heightIn(min=48.dp).semantics{contentDescription="Set a destination"},color=p.panel,contentColor=p.foreground,shape=hudShape(world),border=hudBorder(world)) {
-        Row(Modifier.padding(horizontal=14.dp,vertical=12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {Icon(Icons.Default.Search,null,Modifier.size(21.dp));Text(label,fontFamily=hudFont(world),fontSize=16.sp,lineHeight=21.sp,color=p.foreground,modifier=Modifier.weight(1f),maxLines=2,overflow=TextOverflow.Ellipsis);Icon(Icons.Default.ChevronRight,null,Modifier.size(18.dp))}
+    Surface(onClick=a.search,modifier=modifier.padding(4.dp).heightIn(min=48.dp).semantics{contentDescription=tr("Set a destination","בחירת יעד")},color=p.panel,contentColor=p.foreground,shape=hudShape(world),border=hudBorder(world)) {
+        Row(Modifier.padding(horizontal=14.dp,vertical=12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {Icon(Icons.Default.Search,null,Modifier.size(21.dp));Text(label,fontFamily=hudFont(world),fontSize=16.sp,lineHeight=21.sp,color=p.foreground,modifier=Modifier.weight(1f),maxLines=2,overflow=TextOverflow.Ellipsis);Icon(Icons.Default.ChevronRight,null,Modifier.size(18.dp).mirroredInRtl(isRtl()))}
     }
 }
 @Composable internal fun FixLabel(s:NavState,modifier:Modifier=Modifier) {
     val p=hudPalette(s.world)
     Surface(color=p.panel,modifier=modifier) {Column(Modifier.padding(horizontal=10.dp,vertical=6.dp)) {
-        AtlasText(if(s.gpsReady)"GPS ±${s.accuracy.roundToInt()} m · ${s.mode.label}" else s.gpsStatus,s.world,size=12,color=p.foreground)
-        if(s.gpsReady && !s.headingReliable)AtlasText("Compass calibrating",s.world,size=11,color=p.muted)
+        AtlasText(if(s.gpsReady)tr("GPS ±${s.accuracy.roundToInt()} m · ${s.mode.label}","GPS ±${s.accuracy.roundToInt()} מ׳ · ${s.mode.label}") else s.gpsStatus,s.world,size=12,color=p.foreground)
+        if(s.gpsReady && !s.headingReliable)AtlasText(tr("Compass calibrating","כיול המצפן"),s.world,size=11,color=p.muted)
     }}
 }
 @Composable internal fun PlaceLabel(s:NavState,modifier:Modifier=Modifier,serif:Boolean=false) {
@@ -198,7 +214,7 @@ internal fun atlasToolCaption(label:String)=when(label) {
         Spacer(Modifier.height(6.dp));AtlasTabs(s.world,a)
     }
     Column(Modifier.align(Alignment.CenterEnd).padding(end=16.dp),horizontalAlignment=Alignment.End) {
-        listOf("Food" to Icons.Default.Restaurant,"Fuel" to Icons.Default.LocalGasStation,"Parking" to Icons.Default.LocalParking).forEach{(t,i)->
+        listOf(tr("Food","אוכל") to Icons.Default.Restaurant,tr("Fuel","דלק") to Icons.Default.LocalGasStation,tr("Parking","חניה") to Icons.Default.LocalParking).forEach{(t,i)->
             Surface(onClick={a.nearby(t)},color=Color(0xDD111111),modifier=Modifier.heightIn(min=48.dp)) {Row(Modifier.padding(horizontal=10.dp),verticalAlignment=Alignment.CenterVertically){Text(t,color=Color.White,fontSize=12.sp);Icon(i,null,tint=Color.White,modifier=Modifier.padding(start=12.dp).size(18.dp))}}
         }
         AtlasTool(s.world,Icons.Default.ViewInAr,"Toggle 2D and 3D",a.tilt,light=true)
@@ -216,23 +232,23 @@ internal fun atlasToolCaption(label:String)=when(label) {
     AtlasTool(s.world,Icons.Default.Search,"Set a destination",a.search,Modifier.align(Alignment.TopEnd).padding(top=88.dp,end=18.dp),round=true)
     Column(Modifier.align(Alignment.BottomStart).padding(start=18.dp,bottom=18.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
         Row(horizontalArrangement=Arrangement.spacedBy(5.dp)){AtlasTool(s.world,Icons.Default.MyLocation,"Use my location",a.locate,round=true);AtlasTool(s.world,Icons.Default.BookmarkBorder,"Saved",a.saved,round=true);AtlasTool(s.world,Icons.Default.Layers,"Worlds",a.huds,round=true)}
-        Row(verticalAlignment=Alignment.Bottom,horizontalArrangement=Arrangement.spacedBy(12.dp)){CompassRose(b,s.world,ornate=true,onRecenter=a.locate);Column {FixLabel(s);AtlasAction(s.world,"Settings",a.settings)}}
+        Row(verticalAlignment=Alignment.Bottom,horizontalArrangement=Arrangement.spacedBy(12.dp)){CompassRose(b,s.world,ornate=true,onRecenter=a.locate);Column {FixLabel(s);AtlasAction(s.world,tr("Settings","הגדרות"),a.settings)}}
     }
 }
 @Composable private fun BoxScope.NightCityAtlas(s:NavState,a:AtlasActions) {
     AtlasFrame(s.world)
     Column(Modifier.align(Alignment.TopCenter).padding(18.dp)) {
-        Row(verticalAlignment=Alignment.CenterVertically){AtlasText("MAP",s.world,Modifier.weight(1f),30,color=Color(0xFFFF656A));AtlasTool(s.world,Icons.Default.Search,"Set a destination",a.search);AtlasTool(s.world,Icons.Default.Tune,"Settings",a.settings)}
+        Row(verticalAlignment=Alignment.CenterVertically){AtlasText(tr("MAP","מפה"),s.world,Modifier.weight(1f),30,color=Color(0xFFFF656A));AtlasTool(s.world,Icons.Default.Search,"Set a destination",a.search);AtlasTool(s.world,Icons.Default.Tune,"Settings",a.settings)}
         HorizontalDivider(color=Color(0xFFCC3D49));AtlasText(s.city.uppercase(),s.world,Modifier.padding(top=6.dp),17,color=Color(0xFF87DAD9))
     }
     Column(Modifier.align(Alignment.CenterEnd).padding(end=18.dp),horizontalAlignment=Alignment.End) {
-        AtlasText("DESTINATIONS",s.world,size=12,color=Color(0xFFF2DA5D));Spacer(Modifier.height(7.dp))
-        AtlasAction(s.world,"FIND LOCATION",a.search);AtlasAction(s.world,"SAVED PLACES",a.saved)
+        AtlasText(tr("DESTINATIONS","יעדים"),s.world,size=12,color=Color(0xFFF2DA5D));Spacer(Modifier.height(7.dp))
+        AtlasAction(s.world,tr("FIND LOCATION","חיפוש מיקום"),a.search);AtlasAction(s.world,tr("SAVED PLACES","מקומות שמורים"),a.saved)
     }
-    Column(Modifier.align(Alignment.BottomCenter).padding(18.dp)) {FixLabel(s);Spacer(Modifier.height(8.dp));Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically){AtlasAction(s.world,"Worlds",a.huds);AtlasAction(s.world,stringResource(R.string.recenter),a.locate);AtlasTool(s.world,Icons.Default.ViewInAr,"Toggle 2D and 3D",a.tilt)}}
+    Column(Modifier.align(Alignment.BottomCenter).padding(18.dp)) {FixLabel(s);Spacer(Modifier.height(8.dp));Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically){AtlasAction(s.world,tr("Worlds","עולמות"),a.huds);AtlasAction(s.world,stringResource(R.string.recenter),a.locate);AtlasTool(s.world,Icons.Default.ViewInAr,"Toggle 2D and 3D",a.tilt)}}
 }
 @Composable private fun PixelSlot(label:String,res:Int,action:()->Unit) {
-    Column(Modifier.width(64.dp).clickable(role=Role.Button,onClick=action).semantics(mergeDescendants=true){contentDescription=label},horizontalAlignment=Alignment.CenterHorizontally) {
+    Column(Modifier.width(64.dp).clickable(role=Role.Button,onClick=action).semantics(mergeDescendants=true){contentDescription=atlasToolLabel(label)},horizontalAlignment=Alignment.CenterHorizontally) {
         Box(Modifier.size(56.dp).background(Color(0xFF565653)).drawBehind {
             drawRect(Color(0xFFB5B5AC),size=Size(size.width,3.dp.toPx()));drawRect(Color(0xFFB5B5AC),size=Size(3.dp.toPx(),size.height))
             drawRect(Color(0xFF22231F),Offset(0f,size.height-3.dp.toPx()),Size(size.width,3.dp.toPx()));drawRect(Color(0xFF22231F),Offset(size.width-3.dp.toPx(),0f),Size(3.dp.toPx(),size.height))
@@ -242,7 +258,7 @@ internal fun atlasToolCaption(label:String)=when(label) {
 }
 @Composable private fun BoxScope.PixelAtlas(s:NavState,a:AtlasActions) {
     Column(Modifier.align(Alignment.TopStart).padding(16.dp).background(Color(0xA0101510)).padding(8.dp)) {
-        AtlasText(s.city,s.world,size=14);AtlasText(if(s.fix==null)"Map preview" else "${"%.4f".format(s.fix.lat)}, ${"%.4f".format(s.fix.lon)}",s.world,size=11)
+        AtlasText(s.city,s.world,size=14);AtlasText(if(s.fix==null)tr("Map preview","תצוגה מקדימה של המפה") else "${"%.4f".format(s.fix.lat)}, ${"%.4f".format(s.fix.lon)}",s.world,size=11)
     }
     Column(Modifier.align(Alignment.BottomCenter).padding(bottom=18.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(8.dp)) {
         FixLabel(s);Box(Modifier.width(260.dp).height(5.dp).background(Color(0xFF162212))) {Box(Modifier.fillMaxHeight().fillMaxWidth(if(s.gpsReady)1f else 0f).background(Color(0xFF8BD341)))}
@@ -252,7 +268,7 @@ internal fun atlasToolCaption(label:String)=when(label) {
 @Composable private fun BoxScope.TerminalAtlas(s:NavState,a:AtlasActions) {
     Column(Modifier.align(Alignment.TopCenter).padding(18.dp)) {
         AtlasTabs(s.world,a,activeColor=Color(0xFFA4F780));HorizontalDivider(color=Color(0xFF8BE56C),thickness=2.dp)
-        Row(verticalAlignment=Alignment.CenterVertically){AtlasText("LOCAL MAP",s.world,Modifier.weight(1f),18);AtlasTool(s.world,Icons.Default.Search,"Set a destination",a.search)}
+        Row(verticalAlignment=Alignment.CenterVertically){AtlasText(tr("LOCAL MAP","מפה מקומית"),s.world,Modifier.weight(1f),18);AtlasTool(s.world,Icons.Default.Search,"Set a destination",a.search)}
     }
     Column(Modifier.align(Alignment.BottomCenter).padding(18.dp)) {
         Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){AtlasText(s.city.uppercase(),s.world,Modifier.weight(1f),18);AtlasTool(s.world,Icons.Default.MyLocation,"Use my location",a.locate)}
@@ -260,35 +276,35 @@ internal fun atlasToolCaption(label:String)=when(label) {
     }
 }
 @Composable private fun BoxScope.SanAndreasAtlas(s:NavState,b:Float,a:AtlasActions) {
-    Column(Modifier.align(Alignment.TopStart).padding(18.dp)) {AtlasText("Map",s.world,size=42,color=Color(0xFF1D241C),font=WesternFont);Row(verticalAlignment=Alignment.CenterVertically) {AtlasAction(s.world,"Worlds",a.huds);AtlasAction(s.world,"Saved",a.saved);AtlasTool(s.world,Icons.Default.Tune,"Settings",a.settings)}}
+    Column(Modifier.align(Alignment.TopStart).padding(18.dp)) {AtlasText(tr("Map","מפה"),s.world,size=42,color=Color(0xFF1D241C),font=WesternFont);Row(verticalAlignment=Alignment.CenterVertically) {AtlasAction(s.world,tr("Worlds","עולמות"),a.huds);AtlasAction(s.world,tr("Saved","שמורים"),a.saved);AtlasTool(s.world,Icons.Default.Tune,"Settings",a.settings)}}
     CompassRose(b,s.world,Modifier.align(Alignment.TopEnd).padding(18.dp),onRecenter=a.locate)
     Column(Modifier.align(Alignment.BottomCenter).padding(18.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {PlaceLabel(s);Row(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalAlignment=Alignment.CenterVertically){AtlasFind(s.world,a,Modifier.weight(1f));AtlasTool(s.world,Icons.Default.MyLocation,"Use my location",a.locate,round=true)}}
 }
 @Composable private fun BoxScope.ViceAtlas(s:NavState,b:Float,a:AtlasActions) {
-    Column(Modifier.align(Alignment.TopStart).padding(18.dp)) {AtlasText("Map",s.world,size=44,color=Color(0xFF6B184E),font=ViceFont);PlaceLabel(s)}
+    Column(Modifier.align(Alignment.TopStart).padding(18.dp)) {AtlasText(tr("Map","מפה"),s.world,size=44,color=Color(0xFF6B184E),font=ViceFont);PlaceLabel(s)}
     Column(Modifier.align(Alignment.TopEnd).padding(18.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){AtlasTool(s.world,Icons.Default.Layers,"Worlds",a.huds);AtlasTool(s.world,Icons.Default.Tune,"Settings",a.settings)}
-    Row(Modifier.align(Alignment.BottomCenter).padding(18.dp),verticalAlignment=Alignment.Bottom,horizontalArrangement=Arrangement.spacedBy(8.dp)) {CompassRose(b,s.world,onRecenter=a.locate);Column(Modifier.weight(1f)){AtlasFind(s.world,a);Row(verticalAlignment=Alignment.CenterVertically){AtlasAction(s.world,"Saved",a.saved);AtlasAction(s.world,"Locate",a.locate)}}}
+    Row(Modifier.align(Alignment.BottomCenter).padding(18.dp),verticalAlignment=Alignment.Bottom,horizontalArrangement=Arrangement.spacedBy(8.dp)) {CompassRose(b,s.world,onRecenter=a.locate);Column(Modifier.weight(1f)){AtlasFind(s.world,a);Row(verticalAlignment=Alignment.CenterVertically){AtlasAction(s.world,tr("Saved","שמורים"),a.saved);AtlasAction(s.world,tr("Locate","איתור"),a.locate)}}}
 }
 @Composable private fun BoxScope.LibertyAtlas(s:NavState,a:AtlasActions) {
     Column(Modifier.align(Alignment.TopCenter).padding(16.dp)) {AtlasTabs(s.world,a,activeColor=Color(0xFFE1E4E2));AtlasText(s.city,s.world,Modifier.padding(top=8.dp),22)}
-    Column(Modifier.align(Alignment.BottomEnd).padding(16.dp),horizontalAlignment=Alignment.End,verticalArrangement=Arrangement.spacedBy(4.dp)){AtlasAction(s.world,"Set a destination",a.search);AtlasAction(s.world,"Center on player",a.locate);FixLabel(s)}
+    Column(Modifier.align(Alignment.BottomEnd).padding(16.dp),horizontalAlignment=Alignment.End,verticalArrangement=Arrangement.spacedBy(4.dp)){AtlasAction(s.world,tr("Set a destination","בחירת יעד"),a.search);AtlasAction(s.world,tr("Center on player","מרכוז על השחקן"),a.locate);FixLabel(s)}
 }
 @Composable private fun BoxScope.NudleAtlas(s:NavState,a:AtlasActions) {
     Column(Modifier.align(Alignment.TopCenter).padding(16.dp)) {
         Row(Modifier.fillMaxWidth().background(Color(0xFFF8FAF6)).padding(start=14.dp),verticalAlignment=Alignment.CenterVertically){Text("nudle",fontSize=30.sp,fontWeight=FontWeight.Bold,color=Color(0xFF236AAD),modifier=Modifier.weight(1f));AtlasTool(s.world,Icons.Default.Layers,"Worlds",a.huds);AtlasTool(s.world,Icons.Default.Tune,"Settings",a.settings)}
-        AtlasFind(s.world,a,label="Search places")
+        AtlasFind(s.world,a,label=tr("Search places","חיפוש מקומות"))
     }
-    Column(Modifier.align(Alignment.CenterStart).padding(16.dp),verticalArrangement=Arrangement.spacedBy(6.dp)){AtlasTool(s.world,Icons.Default.Restaurant,"Find food",{a.nearby("Food")},round=true);AtlasTool(s.world,Icons.Default.LocalGasStation,"Find fuel",{a.nearby("Fuel")},round=true);AtlasTool(s.world,Icons.Default.BookmarkBorder,"Saved",a.saved,round=true)}
+    Column(Modifier.align(Alignment.CenterStart).padding(16.dp),verticalArrangement=Arrangement.spacedBy(6.dp)){AtlasTool(s.world,Icons.Default.Restaurant,"Find food",{a.nearby(tr("Food","אוכל"))},round=true);AtlasTool(s.world,Icons.Default.LocalGasStation,"Find fuel",{a.nearby(tr("Fuel","דלק"))},round=true);AtlasTool(s.world,Icons.Default.BookmarkBorder,"Saved",a.saved,round=true)}
     Row(Modifier.align(Alignment.BottomCenter).padding(16.dp).fillMaxWidth(),verticalAlignment=Alignment.Bottom,horizontalArrangement=Arrangement.spacedBy(8.dp)){Column(Modifier.weight(1f)){PlaceLabel(s);FixLabel(s)};AtlasTool(s.world,Icons.Default.MyLocation,"Use my location",a.locate,light=true,round=true)}
 }
 @Composable private fun BoxScope.HeatAtlas(s:NavState,a:AtlasActions) {
-    Column(Modifier.align(Alignment.TopStart).padding(18.dp)){AtlasText("NIGHT / MAP",s.world,size=28,color=Color(0xFFEC72C8));AtlasText(s.city,s.world,size=16);Row(verticalAlignment=Alignment.CenterVertically){AtlasAction(s.world,"Worlds",a.huds);AtlasAction(s.world,"Saved",a.saved);AtlasTool(s.world,Icons.Default.Tune,"Settings",a.settings)}}
-    Column(Modifier.align(Alignment.BottomEnd).padding(18.dp),horizontalAlignment=Alignment.End){AtlasAction(s.world,"SET ROUTE",a.search,active=true);Spacer(Modifier.height(6.dp));Row(verticalAlignment=Alignment.CenterVertically){FixLabel(s);AtlasTool(s.world,Icons.Default.MyLocation,"Use my location",a.locate)}}
+    Column(Modifier.align(Alignment.TopStart).padding(18.dp)){AtlasText(tr("NIGHT / MAP","לילה / מפה"),s.world,size=28,color=Color(0xFFEC72C8));AtlasText(s.city,s.world,size=16);Row(verticalAlignment=Alignment.CenterVertically){AtlasAction(s.world,tr("Worlds","עולמות"),a.huds);AtlasAction(s.world,tr("Saved","שמורים"),a.saved);AtlasTool(s.world,Icons.Default.Tune,"Settings",a.settings)}}
+    Column(Modifier.align(Alignment.BottomEnd).padding(18.dp),horizontalAlignment=Alignment.End){AtlasAction(s.world,tr("SET ROUTE","קביעת מסלול"),a.search,active=true);Spacer(Modifier.height(6.dp));Row(verticalAlignment=Alignment.CenterVertically){FixLabel(s);AtlasTool(s.world,Icons.Default.MyLocation,"Use my location",a.locate)}}
 }
 @Composable private fun BoxScope.ForzaAtlas(s:NavState,a:AtlasActions) {
-    Column(Modifier.align(Alignment.TopCenter).padding(16.dp)) {Row(Modifier.background(Color(0xFFF5F2F2)),verticalAlignment=Alignment.CenterVertically){AtlasAction(s.world,"WORLD MAP",a.search,Modifier.weight(1f),true);AtlasTool(s.world,Icons.Default.Layers,"Worlds",a.huds);AtlasTool(s.world,Icons.Default.Tune,"Settings",a.settings)};PlaceLabel(s)}
+    Column(Modifier.align(Alignment.TopCenter).padding(16.dp)) {Row(Modifier.background(Color(0xFFF5F2F2)),verticalAlignment=Alignment.CenterVertically){AtlasAction(s.world,tr("WORLD MAP","מפת העולם"),a.search,Modifier.weight(1f),true);AtlasTool(s.world,Icons.Default.Layers,"Worlds",a.huds);AtlasTool(s.world,Icons.Default.Tune,"Settings",a.settings)};PlaceLabel(s)}
     Column(Modifier.align(Alignment.CenterStart).padding(start=16.dp),verticalArrangement=Arrangement.spacedBy(4.dp)){AtlasTool(s.world,Icons.Default.BookmarkBorder,"Saved",a.saved);AtlasTool(s.world,Icons.Default.ViewInAr,"Toggle 2D and 3D",a.tilt)}
-    Row(Modifier.align(Alignment.BottomCenter).padding(16.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)){AtlasFind(s.world,a,Modifier.weight(1f),"Find a place");AtlasTool(s.world,Icons.Default.MyLocation,"Use my location",a.locate,light=true)}
+    Row(Modifier.align(Alignment.BottomCenter).padding(16.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)){AtlasFind(s.world,a,Modifier.weight(1f),tr("Find a place","חיפוש מקום"));AtlasTool(s.world,Icons.Default.MyLocation,"Use my location",a.locate,light=true)}
 }
 @Composable private fun BoxScope.CompactAtlas(s:NavState,b:Float,a:AtlasActions) {
     Column(Modifier.align(Alignment.TopStart).widthIn(max=310.dp).padding(12.dp)){AtlasTabs(s.world,a);PlaceLabel(s)}

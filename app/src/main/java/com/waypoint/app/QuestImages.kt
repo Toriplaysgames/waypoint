@@ -26,7 +26,7 @@ object QuestImages {
 
     /** Decode bounds before pixels; only our small re-encoded JPEG is retained, without EXIF metadata. */
     suspend fun import(context: Context, uri: Uri): String = withContext(Dispatchers.IO) {
-        require(uri.scheme == "content") { "Choose a photo from the photo picker." }
+        require(uri.scheme == "content") { tr("Choose a photo from the photo picker.","בחרו תמונה מבורר התמונות.") }
         val bytes = context.contentResolver.openInputStream(uri)?.use { stream ->
             val output = java.io.ByteArrayOutputStream()
             val buffer = ByteArray(8192)
@@ -35,18 +35,18 @@ object QuestImages {
                 val count = stream.read(buffer)
                 if (count < 0) break
                 total += count
-                require(total <= 16 * 1024 * 1024) { "Choose a photo smaller than 16 MB." }
+                require(total <= 16 * 1024 * 1024) { tr("Choose a photo smaller than 16 MB.","בחרו תמונה קטנה מ-16MB.") }
                 output.write(buffer, 0, count)
             }
             output.toByteArray()
-        } ?: error("This photo could not be opened. Try a different photo.")
+        } ?: error(tr("This photo could not be opened. Try a different photo.","לא הצלחנו לפתוח את התמונה. נסו תמונה אחרת."))
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
-        require(bounds.outWidth in 1..16000 && bounds.outHeight in 1..16000) { "This photo could not be opened. Try a different photo." }
+        require(bounds.outWidth in 1..16000 && bounds.outHeight in 1..16000) { tr("This photo could not be opened. Try a different photo.","לא הצלחנו לפתוח את התמונה. נסו תמונה אחרת.") }
         var sample = 1
         while (maxOf(bounds.outWidth, bounds.outHeight) / sample > 1024) sample *= 2
         val decoded = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
-            ?: error("This photo format is not supported.")
+            ?: error(tr("This photo format is not supported.","פורמט התמונה הזה אינו נתמך."))
         val orientation = runCatching { ExifInterface(bytes.inputStream()).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL) }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
         val transform = Matrix().apply {
             when (orientation) {

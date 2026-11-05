@@ -58,8 +58,8 @@ internal fun FeedbackSettingsRow(onClick: () -> Unit) {
     ) {
         Icon(Icons.Default.RateReview, null, Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary)
         Column(Modifier.weight(1f)) {
-            Text("Send feedback", style = MaterialTheme.typography.titleMedium)
-            Text("Open a GitHub issue in your words", style = MaterialTheme.typography.bodySmall, color = Muted)
+            Text(tr("Send feedback","שליחת משוב"), style = MaterialTheme.typography.titleMedium)
+            Text(tr("Open a GitHub issue in your words","פתיחת דיווח ב-GitHub במילים שלך"), style = MaterialTheme.typography.bodySmall, color = Muted)
         }
         Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(20.dp), tint = Muted)
     }
@@ -83,12 +83,12 @@ internal fun FeedbackSheet(world: World, onBack: () -> Unit, onLeaveApp: () -> U
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back to settings")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, tr("Back to settings","חזרה להגדרות"))
             }
-            Text("Send feedback", style = MaterialTheme.typography.headlineMedium)
+            Text(tr("Send feedback","שליחת משוב"), style = MaterialTheme.typography.headlineMedium)
         }
         Text(
-            "Tell us what happened or what you would like to see. Your report opens on GitHub for you to review and submit.",
+            tr("Tell us what happened or what you would like to see. Your report opens on GitHub for you to review and submit.","ספרו לנו מה קרה או מה הייתם רוצים לראות. הדיווח ייפתח ב-GitHub כדי שתוכלו לעבור עליו ולשלוח. כדאי לכתוב באנגלית."),
             style = MaterialTheme.typography.bodyMedium,
             color = Muted,
         )
@@ -97,14 +97,14 @@ internal fun FeedbackSheet(world: World, onBack: () -> Unit, onLeaveApp: () -> U
                 FilterChip(
                     selected = kind == option,
                     onClick = { kindName = option.name },
-                    label = { Text(option.label) },
+                    label = { Text(option.localLabel) },
                 )
             }
         }
         OutlinedTextField(
             value = title,
             onValueChange = { title = it.take(MAX_FEEDBACK_TITLE) },
-            label = { Text("Issue title") },
+            label = { Text(tr("Issue title","כותרת הדיווח")) },
             supportingText = { Text("${title.length}/$MAX_FEEDBACK_TITLE") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
@@ -113,7 +113,7 @@ internal fun FeedbackSheet(world: World, onBack: () -> Unit, onLeaveApp: () -> U
         OutlinedTextField(
             value = details,
             onValueChange = { details = it.take(MAX_FEEDBACK_DETAILS) },
-            label = { Text("Your experience or idea") },
+            label = { Text(tr("Your experience or idea","החוויה או הרעיון שלך")) },
             supportingText = { Text("${details.length}/$MAX_FEEDBACK_DETAILS") },
             minLines = 5,
             maxLines = 8,
@@ -121,17 +121,17 @@ internal fun FeedbackSheet(world: World, onBack: () -> Unit, onLeaveApp: () -> U
             modifier = Modifier.fillMaxWidth(),
         )
         Text(
-            "Only your words, the selected world and the app version are added. Your location and routes are not attached.",
+            tr("Only your words, the selected world and the app version are added. Your location and routes are not attached.","נוספים רק המילים שלך, העולם שנבחר וגרסת האפליקציה. המיקום והמסלולים שלך לא מצורפים."),
             style = MaterialTheme.typography.bodySmall,
             color = Muted,
         )
         if (tooLong) Text(
-            "This report is too long for a GitHub link. Shorten it, then try again.",
+            tr("This report is too long for a GitHub link. Shorten it, then try again.","הדיווח ארוך מדי לקישור של GitHub. קצרו אותו ונסו שוב."),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error,
         )
         if (browserError) Text(
-            "No app can open GitHub. Install a browser and try again.",
+            tr("No app can open GitHub. Install a browser and try again.","אין אפליקציה שיכולה לפתוח את GitHub. התקינו דפדפן ונסו שוב."),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error,
         )
@@ -147,7 +147,7 @@ internal fun FeedbackSheet(world: World, onBack: () -> Unit, onLeaveApp: () -> U
         ) {
             Icon(Icons.AutoMirrored.Filled.OpenInNew, null, Modifier.size(18.dp))
             Spacer(Modifier.size(8.dp))
-            Text("Review issue on GitHub")
+            Text(tr("Review issue on GitHub","מעבר לדיווח ב-GitHub"))
         }
         TextButton(
             onClick = {
@@ -155,7 +155,7 @@ internal fun FeedbackSheet(world: World, onBack: () -> Unit, onLeaveApp: () -> U
                 if (!browserError) onLeaveApp()
             },
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-        ) { Text("Browse existing issues") }
+        ) { Text(tr("Browse existing issues","עיון בדיווחים קיימים")) }
         Spacer(Modifier.height(16.dp))
     }
 }

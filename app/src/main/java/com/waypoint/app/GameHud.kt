@@ -136,13 +136,13 @@ fun World.inspiration()=when(this) {
     World.STALKER->"S.T.A.L.K.E.R.: Shadow of Chernobyl"
     World.DIVISION->"Tom Clancy’s The Division"
     World.SEA_CHART->"Sea of Thieves"
-    World.DOS_ATLAS->"DOS / ASCII interfaces"
+    World.DOS_ATLAS->tr("DOS / ASCII interfaces","ממשקי DOS / ASCII")
     World.AINCRAD->"Sword Art Online"
     World.COUNTER_STRIKE->"Counter-Strike"
     World.DEFCON->"DEFCON"
     World.FIELD_OPS->"Call of Duty: Modern Warfare"
-    World.RETRO_QUEST->"16-bit console adventures"
-    World.HOME_CONSOLE->"Wii U console interface"
+    World.RETRO_QUEST->tr("16-bit console adventures","הרפתקאות קונסולה של 16 ביט")
+    World.HOME_CONSOLE->tr("Wii U console interface","ממשק הקונסולה של Wii U")
     World.LOS_SANTOS->"Grand Theft Auto V"
     World.OLD_WEST->"Red Dead Redemption 2"
     World.NIGHT_CITY->"Cyberpunk 2077"
@@ -188,10 +188,10 @@ fun World.inspiration()=when(this) {
                     },lineHeight=30.sp,fontWeight=FontWeight.Bold,maxLines=1,overflow=TextOverflow.Ellipsis)
                     Text(world.inspiration(),fontSize=11.sp,lineHeight=15.sp,color=if(world==World.NIGHT_CITY)Color(0xFFFF8B8B) else p.muted,maxLines=1,overflow=TextOverflow.Ellipsis)
                 }
-                Icon(Icons.Default.ExpandMore,"Change HUD theme",Modifier.size(22.dp),tint=p.accent)
+                Icon(Icons.Default.ExpandMore,tr("Change HUD theme","החלפת ערכת הממשק"),Modifier.size(22.dp),tint=p.accent)
             }
         }
-        HudControl(world,Icons.Default.Tune,"Settings",onSettings)
+        HudControl(world,Icons.Default.Tune,tr("Settings","הגדרות"),onSettings)
     }
 }
 
@@ -200,7 +200,7 @@ fun World.inspiration()=when(this) {
     Surface(onClick=onSearch,modifier=Modifier.fillMaxWidth().heightIn(min=52.dp),color=p.panel,contentColor=p.foreground,shape=hudShape(world),border=hudBorder(world)) {
         Row(Modifier.padding(horizontal=14.dp,vertical=12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {
             Icon(Icons.Default.Search,null,Modifier.size(22.dp),tint=p.accent)
-            Text(if(world==World.GREEN_TERMINAL)"SEARCH DESTINATION" else "Set a destination",fontFamily=if(world in listOf(World.GREEN_TERMINAL,World.PIXEL))PixelFont else FontFamily.Default,fontSize=if(world in listOf(World.GREEN_TERMINAL,World.PIXEL))21.sp else 15.sp,lineHeight=24.sp,modifier=Modifier.weight(1f))
+            Text(if(world==World.GREEN_TERMINAL)tr("SEARCH DESTINATION","חיפוש יעד") else tr("Set a destination","בחירת יעד"),fontFamily=if(world in listOf(World.GREEN_TERMINAL,World.PIXEL))PixelFont else FontFamily.Default,fontSize=if(world in listOf(World.GREEN_TERMINAL,World.PIXEL))21.sp else 15.sp,lineHeight=24.sp,modifier=Modifier.weight(1f))
             Icon(Icons.AutoMirrored.Filled.ArrowForward,null,Modifier.size(18.dp),tint=p.muted)
         }
     }
@@ -209,7 +209,7 @@ fun World.inspiration()=when(this) {
 @Composable fun HudQuickPlaces(world:World,onSearch:(String)->Unit) {
     val p=hudPalette(world)
     Row(Modifier.horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-        listOf("Coffee" to Icons.Default.LocalCafe,"Fuel" to Icons.Default.LocalGasStation,"Parking" to Icons.Default.LocalParking).forEach{(label,icon)->
+        listOf(tr("Coffee","קפה") to Icons.Default.LocalCafe,tr("Fuel","דלק") to Icons.Default.LocalGasStation,tr("Parking","חניה") to Icons.Default.LocalParking).forEach{(label,icon)->
             Surface(onClick={onSearch(label)},color=p.panel,contentColor=p.foreground,shape=hudShape(world),border=hudBorder(world),modifier=Modifier.heightIn(min=48.dp)) {
                 Row(Modifier.padding(horizontal=12.dp,vertical=10.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(7.dp)) {
                     Icon(icon,null,Modifier.size(17.dp));Text(label,fontSize=12.sp,lineHeight=16.sp)
@@ -237,7 +237,7 @@ fun World.inspiration()=when(this) {
         if(state.navigating) Surface(color=p.panel,contentColor=p.foreground,shape=if(state.world==World.OLD_WEST)CircleShape else hudShape(state.world),border=hudBorder(state.world)) {
             Row(Modifier.padding(horizontal=14.dp,vertical=8.dp),verticalAlignment=Alignment.Bottom,horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                 Text(if(state.gpsReady)(state.speed*if(state.imperial)2.23694 else 3.6).roundToInt().toString() else "—",fontFamily=hudFont(state.world),fontSize=36.sp,lineHeight=41.sp,fontWeight=FontWeight.Bold)
-                Text(if(state.imperial)"MPH" else "KM/H",fontSize=10.sp,lineHeight=14.sp,modifier=Modifier.padding(bottom=8.dp))
+                Text(if(state.imperial)tr("MPH","מייל/ש׳") else tr("KM/H","קמ״ש"),fontSize=10.sp,lineHeight=14.sp,modifier=Modifier.padding(bottom=8.dp))
             }
         }
         Surface(color=p.panel,contentColor=p.foreground,shape=hudShape(state.world)) {
@@ -255,10 +255,10 @@ fun World.inspiration()=when(this) {
         Column {
             Row(Modifier.padding(start=14.dp,end=6.dp,top=8.dp,bottom=8.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {
                 Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(3.dp)) {
-                    Text(if(state.gpsReady)"READY TO NAVIGATE" else state.gpsStatus.uppercase(),fontFamily=hudFont(state.world),fontSize=18.sp,lineHeight=24.sp,color=p.accent,maxLines=2)
-                    Text(when {state.gpsReady->"Accuracy ±${state.accuracy.roundToInt()} m · ${state.mode.label}";state.fix!=null->"Accuracy ±${state.accuracy.roundToInt()} m · Move near a window";else->"Use precise location for directions"},fontSize=11.sp,lineHeight=15.sp,color=p.muted)
+                    Text(if(state.gpsReady)tr("READY TO NAVIGATE","מוכן לניווט") else state.gpsStatus.uppercase(),fontFamily=hudFont(state.world),fontSize=18.sp,lineHeight=24.sp,color=p.accent,maxLines=2)
+                    Text(when {state.gpsReady->tr("Accuracy ±${state.accuracy.roundToInt()} m · ${state.mode.label}","דיוק ±${state.accuracy.roundToInt()} מ׳ · ${state.mode.label}");state.fix!=null->tr("Accuracy ±${state.accuracy.roundToInt()} m · Move near a window","דיוק ±${state.accuracy.roundToInt()} מ׳ · התקרבו לחלון");else->tr("Use precise location for directions","כדי לקבל מסלול, השתמשו במיקום מדויק")},fontSize=11.sp,lineHeight=15.sp,color=p.muted)
                 }
-                IconButton(onClick=if(state.gpsReady)onSearch else onLocate) { Icon(if(state.gpsReady)Icons.AutoMirrored.Filled.ArrowForward else Icons.Default.MyLocation,if(state.gpsReady)"Set a destination" else "Connect GPS",tint=p.accent) }
+                IconButton(onClick=if(state.gpsReady)onSearch else onLocate) { Icon(if(state.gpsReady)Icons.AutoMirrored.Filled.ArrowForward else Icons.Default.MyLocation,if(state.gpsReady)tr("Set a destination","בחירת יעד") else tr("Connect GPS","חיבור GPS"),tint=p.accent) }
             }
             if(state.world in listOf(World.LOS_SANTOS,World.SAN_ANDREAS)) HudStatusBars(state)
             if(state.world==World.PIXEL) Box(Modifier.fillMaxWidth().height(4.dp).background(Color(0xFF101A0D))) { Box(Modifier.fillMaxWidth(if(state.gpsReady)1f else 0f).height(4.dp).background(p.accent)) }
@@ -269,7 +269,7 @@ fun World.inspiration()=when(this) {
 @Composable internal fun HudStatusBars(state:NavState) {
     val progress=state.progress?.let{1f-(it.remaining/(state.route?.meters ?: 1.0)).toFloat()} ?: 0f
     Row(Modifier.padding(horizontal=10.dp,vertical=6.dp),horizontalArrangement=Arrangement.spacedBy(4.dp)) {
-        listOf(Triple("GPS",if(state.gpsReady)1f else 0f,Color(0xFF91BC77)),Triple("ROUTE",progress,Color(0xFF7EC5DE)),Triple("VOICE",if(state.voice)1f else 0f,Color(0xFFE5C76C))).forEach{(label,fraction,color)->
+        listOf(Triple("GPS",if(state.gpsReady)1f else 0f,Color(0xFF91BC77)),Triple(tr("ROUTE","מסלול"),progress,Color(0xFF7EC5DE)),Triple(tr("VOICE","קול"),if(state.voice)1f else 0f,Color(0xFFE5C76C))).forEach{(label,fraction,color)->
             Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(3.dp)) {
                 Text(label,fontSize=9.sp,lineHeight=12.sp,color=Color(0xFFC0C5BF),letterSpacing=0.5.sp)
                 Box(Modifier.fillMaxWidth().height(4.dp).background(color.copy(alpha=0.22f))) { Box(Modifier.fillMaxWidth(fraction.coerceIn(0f,1f)).fillMaxHeight().background(color)) }
@@ -281,11 +281,11 @@ fun World.inspiration()=when(this) {
 @Composable fun HudManeuver(state:NavState,onClick:()->Unit) {
     val p=hudPalette(state.world)
     val guidance=routeGuidance(state.route,state.progress)
-    val distanceText=when { !state.gpsReady -> "Finding GPS"; state.routing -> "Rerouting…"; state.offRoute -> "Off route"; else -> formatDistance(state.progress?.toTurn ?: 0.0,state.imperial) }
-    val instructionText=when { !state.gpsReady -> "Waiting for a fresh, accurate location"; state.routing -> "Updating the route from your position"; state.offRoute -> if(state.routeError!=null)"Route unavailable · check connection and keep moving" else "Checking your position for a new route"; else -> guidance.instruction }
+    val distanceText=when { !state.gpsReady -> tr("Finding GPS","מאתרים GPS"); state.routing -> tr("Rerouting…","מחשבים מסלול מחדש…"); state.offRoute -> tr("Off route","מחוץ למסלול"); else -> formatDistance(state.progress?.toTurn ?: 0.0,state.imperial) }
+    val instructionText=when { !state.gpsReady -> tr("Waiting for a fresh, accurate location","ממתינים למיקום עדכני ומדויק"); state.routing -> tr("Updating the route from your position","מעדכנים את המסלול מהמיקום שלך"); state.offRoute -> if(state.routeError!=null)tr("Route unavailable · check connection and keep moving","המסלול אינו זמין · בדקו את החיבור והמשיכו לנוע") else tr("Checking your position for a new route","בודקים את המיקום שלך לחישוב מסלול חדש"); else -> guidance.instruction }
     Surface(onClick=onClick,color=p.panel,contentColor=p.foreground,shape=hudShape(state.world),border=hudBorder(state.world),
         modifier=Modifier.fillMaxWidth().semantics {
-            contentDescription="$distanceText. $instructionText. Show route steps"
+            contentDescription=tr("$distanceText. $instructionText. Show route steps","$distanceText. $instructionText. הצגת שלבי המסלול")
             liveRegion=LiveRegionMode.Polite
         }) {
         Column {
@@ -295,7 +295,7 @@ fun World.inspiration()=when(this) {
                     Text(distanceText,fontFamily=hudFont(state.world),fontWeight=FontWeight.Bold,fontSize=34.sp,lineHeight=39.sp,color=p.accent)
                     Text(instructionText,fontSize=16.sp,lineHeight=22.sp,maxLines=3,overflow=TextOverflow.Ellipsis)
                 }
-                Icon(Icons.Default.ExpandMore,"Show route steps",Modifier.size(20.dp),tint=p.muted)
+                Icon(Icons.Default.ExpandMore,tr("Show route steps","הצגת שלבי המסלול"),Modifier.size(20.dp),tint=p.muted)
             }
             Box(Modifier.fillMaxWidth().height(3.dp).background(Color(android.graphics.Color.parseColor(state.world.routeColor))))
         }
@@ -308,15 +308,15 @@ fun World.inspiration()=when(this) {
     Surface(color=p.panel,contentColor=p.foreground,shape=hudShape(state.world),border=hudBorder(state.world),modifier=Modifier.fillMaxWidth()) {
         Column {
             Row(Modifier.padding(12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-                TextButton(onClick=onStop,contentPadding=PaddingValues(2.dp),modifier=Modifier.width(64.dp).heightIn(min=64.dp).semantics{contentDescription="End navigation"}) { Column(horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(5.dp)){Icon(Icons.Default.Close,null,tint=p.foreground);Text("End trip",color=p.foreground,fontFamily=PipBoyFont,fontSize=12.sp,lineHeight=16.sp,letterSpacing=0.sp,maxLines=1,softWrap=false)} }
+                TextButton(onClick=onStop,contentPadding=PaddingValues(2.dp),modifier=Modifier.width(64.dp).heightIn(min=64.dp).semantics{contentDescription=tr("End navigation","סיום הניווט")}) { Column(horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(5.dp)){Icon(Icons.Default.Close,null,tint=p.foreground);Text(tr("End trip","סיום הנסיעה"),color=p.foreground,fontFamily=PipBoyFont,fontSize=12.sp,lineHeight=16.sp,letterSpacing=0.sp,maxLines=1,softWrap=false)} }
                 Column(Modifier.weight(1f).clickable(role=Role.Button,onClick=onSteps).heightIn(min=48.dp),verticalArrangement=Arrangement.Center) {
                     Row(verticalAlignment=Alignment.Bottom,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                        Text("${ceil(seconds/60).toInt().coerceAtLeast(1)} min",fontFamily=hudFont(state.world),fontSize=29.sp,lineHeight=33.sp,color=p.accent)
+                        Text(tr("${ceil(seconds/60).toInt().coerceAtLeast(1)} min","${ceil(seconds/60).toInt().coerceAtLeast(1)} דק׳"),fontFamily=hudFont(state.world),fontSize=29.sp,lineHeight=33.sp,color=p.accent)
                         Text(formatDistance(state.progress?.remaining ?: state.route?.meters ?: 0.0,state.imperial),fontSize=13.sp,lineHeight=18.sp,modifier=Modifier.padding(bottom=4.dp))
                     }
-                    Text("${SimpleDateFormat("h:mm a",Locale.getDefault()).format(Date(System.currentTimeMillis()+(seconds*1000).toLong()))} arrival · ${if(state.gpsReady) (state.speed * if(state.imperial)2.23694 else 3.6).roundToInt().toString() else "—"} ${if(state.imperial)"mph" else "km/h"}",fontSize=12.sp,lineHeight=16.sp,color=p.muted)
+                    Text(arrivalSummary(SimpleDateFormat(tr("h:mm a","HH:mm"),Locale.getDefault()).format(Date(System.currentTimeMillis()+(seconds*1000).toLong())),if(state.gpsReady) (state.speed * if(state.imperial)2.23694 else 3.6).roundToInt().toString() else "—",if(state.imperial)tr("mph","מייל/ש׳") else tr("km/h","קמ״ש")),fontSize=12.sp,lineHeight=16.sp,color=p.muted)
                 }
-                TextButton(onClick=onSteps,contentPadding=PaddingValues(2.dp),modifier=Modifier.width(64.dp).heightIn(min=64.dp).semantics{contentDescription="Route steps"}) { Column(horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(5.dp)){Icon(Icons.AutoMirrored.Filled.FormatListBulleted,null,tint=p.foreground);Text("Steps",color=p.foreground,fontFamily=PipBoyFont,fontSize=12.sp,lineHeight=16.sp,letterSpacing=0.sp,maxLines=1,softWrap=false)} }
+                TextButton(onClick=onSteps,contentPadding=PaddingValues(2.dp),modifier=Modifier.width(64.dp).heightIn(min=64.dp).semantics{contentDescription=tr("Route steps","שלבי המסלול")}) { Column(horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(5.dp)){Icon(Icons.AutoMirrored.Filled.FormatListBulleted,null,tint=p.foreground);Text(tr("Steps","שלבים"),color=p.foreground,fontFamily=PipBoyFont,fontSize=12.sp,lineHeight=16.sp,letterSpacing=0.sp,maxLines=1,softWrap=false)} }
             }
             if(state.world in listOf(World.LOS_SANTOS,World.SAN_ANDREAS)) HudStatusBars(state)
         }
@@ -327,7 +327,7 @@ fun World.inspiration()=when(this) {
     val p=hudPalette(world)
     Surface(color=p.panel,contentColor=p.foreground) {
         Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal=8.dp,vertical=8.dp),horizontalArrangement=Arrangement.spacedBy(if(world==World.PIXEL)5.dp else 0.dp)) {
-            listOf("Map" to Icons.Default.Map,"Worlds" to Icons.Default.Layers,"Saved" to Icons.Default.BookmarkBorder,"Quests" to Icons.Default.Assignment).forEachIndexed { index,(label,icon)->
+            listOf(tr("Map","מפה") to Icons.Default.Map,tr("Worlds","עולמות") to Icons.Default.Layers,tr("Saved","שמורים") to Icons.Default.BookmarkBorder,tr("Quests","משימות") to Icons.Default.Assignment).forEachIndexed { index,(label,icon)->
                 val active=selected==index
                 val frame=when {world==World.PIXEL->Modifier.border(if(active)2.dp else 1.dp,if(active)Cream else Color(0xFF76796D))
                     world==World.GREEN_TERMINAL && active->Modifier.border(1.dp,p.accent)
@@ -432,6 +432,40 @@ fun World.matchesGameQuery(query:String):Boolean {
         else->""
     }
     fun normalize(value:String)=value.filter{it.isLetterOrDigit()}.lowercase()
-    val haystack=normalize("$title ${inspiration()} $aliases")
+    val haystack=normalize("$title ${inspiration()} $aliases ${hebrewGameAliases()}")
     return normalize(query).let{it.isBlank() || haystack.contains(it)}
+}
+
+/** "9:41 PM arrival · 42 km/h", or in Hebrew "הגעה ב-21:41 · 42 קמ״ש". */
+internal fun arrivalSummary(time:String,speed:String,unit:String):String =
+    tr("$time arrival · $speed $unit","הגעה ב-$time · $speed $unit")
+
+/** Hebrew spellings people type for these games, so world search works without switching keyboards. */
+internal fun World.hebrewGameAliases():String=when(this){
+    World.LOS_SANTOS,World.SAN_ANDREAS,World.VICE_COAST,World.LIBERTY->"ג׳י טי איי גי טי איי גראנד תפט אוטו"
+    World.OLD_WEST->"רד דד רדמפשן"
+    World.NIGHT_CITY->"סייברפאנק"
+    World.PIXEL->"מיינקראפט מינקראפט"
+    World.GREEN_TERMINAL->"פולאאוט פול אאוט"
+    World.HEAT->"ניד פור ספיד"
+    World.RIVIA->"וויצ׳ר ויצ׳ר המכשף"
+    World.CTOS->"וואץ׳ דוגס"
+    World.HYRULE,World.RETRO_QUEST->"זלדה"
+    World.SKYRIM->"סקיירים"
+    World.LANDS_BETWEEN->"אלדן רינג"
+    World.HORIZON->"פורזה"
+    World.ASSASSIN->"אססינס קריד"
+    World.FAR_CRY->"פאר קריי"
+    World.GHOST->"גוסט אוף צושימה"
+    World.BRIDGES->"דת׳ סטרנדינג"
+    World.HORIZON_WILDS->"הורייזן"
+    World.SPIDER->"ספיידרמן ספיידר מן"
+    World.HOGWARTS->"הוגוורטס הארי פוטר"
+    World.STARFIELD->"סטארפילד"
+    World.MAFIA->"מאפיה"
+    World.COUNTER_STRIKE->"קאונטר סטרייק"
+    World.FIELD_OPS->"קול אוף דיוטי"
+    World.STALKER->"סטוקר"
+    World.NIER->"ניר"
+    else->""
 }

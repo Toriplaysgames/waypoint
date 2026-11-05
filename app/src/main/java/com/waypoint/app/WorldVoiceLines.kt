@@ -7,7 +7,7 @@ private fun WorldVoiceStyle.withLines(opening2:String,opening3:String,cue2:Strin
                                      arrival2:String,arrival3:String)=WorldVoiceLines(
     listOf(opening,opening2,opening3),listOf(cue,cue2,cue3),listOf(arrival,arrival2,arrival3))
 
-internal fun World.voiceLines():WorldVoiceLines=voiceStyle().let { style ->
+internal fun World.voiceLines():WorldVoiceLines=if(AppLanguage.isHebrew) hebrewVoiceLines() else voiceStyle().let { style ->
     when(this) {
         World.LOS_SANTOS -> style.withLines(
             "City map loaded. Let's roll.","A new trip across town.",

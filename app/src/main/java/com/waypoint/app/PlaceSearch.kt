@@ -34,11 +34,11 @@ object PlaceMatcher {
     fun score(query:String,place:Place):Double {
         val normalized=normalize(query)
         val categories=when(normalized) {
-            "food", "restaurant", "restaurants" -> setOf("restaurant","fast_food","food_court","food")
-            "coffee", "cafe", "cafes" -> setOf("cafe","coffee_shop")
-            "fuel", "petrol", "petrol station", "gas station" -> setOf("fuel")
-            "parking" -> setOf("parking")
-            "hotel", "hotels" -> setOf("hotel","motel","hostel","guest_house")
+            "food", "restaurant", "restaurants", "אוכל", "מסעדה", "מסעדות" -> setOf("restaurant","fast_food","food_court","food")
+            "coffee", "cafe", "cafes", "קפה", "בית קפה", "בתי קפה" -> setOf("cafe","coffee_shop")
+            "fuel", "petrol", "petrol station", "gas station", "דלק", "תחנת דלק", "תחנות דלק" -> setOf("fuel")
+            "parking", "חניה", "חנייה", "חניון", "חניונים" -> setOf("parking")
+            "hotel", "hotels", "מלון", "מלונות", "בית מלון" -> setOf("hotel","motel","hostel","guest_house")
             else -> emptySet()
         }
         if(place.kind in categories)return 1.0
@@ -66,6 +66,15 @@ object PlaceMatcher {
                 out
             }.take(12)
     }
+    /** Hebrew category words reach providers as the English keyword their indexes understand. */
+    fun providerQuery(query:String):String = when(normalize(query)) {
+        "אוכל", "מסעדה", "מסעדות" -> "food"
+        "קפה", "בית קפה", "בתי קפה" -> "coffee"
+        "דלק", "תחנת דלק", "תחנות דלק" -> "fuel"
+        "חניה", "חנייה", "חניון", "חניונים" -> "parking"
+        "מלון", "מלונות", "בית מלון" -> "hotel"
+        else -> query
+    }
     fun variants(query:String):List<String> {
         val cleaned=query.trim().replace(Regex("\\s+")," ")
         // Common concatenated junction suffixes; no guessed coordinates or silently invented places.
@@ -91,10 +100,10 @@ internal fun coordinateSearchResult(query: String, local: List<Place>): PlaceSea
     if (!Regex("^[+-]?[0-9.]+\\s*,\\s*[+-]?[0-9.]*\\s*(?:\\([^()]*\\))?$").matches(value)) return null
     val encoded = URLEncoder.encode(value, "UTF-8")
     val point = (NavigationImport.parse("android.intent.action.VIEW", "geo:0,0?q=$encoded") as? NavigationImport.Point)
-        ?.coordinate ?: return PlaceSearchResult(emptyList(), "Enter valid coordinates as latitude, longitude (for example, 51.5007, -0.1246).")
+        ?.coordinate ?: return PlaceSearchResult(emptyList(), tr("Enter valid coordinates as latitude, longitude (for example, 51.5007, -0.1246).","הזינו קואורדינטות תקינות בפורמט קו רוחב, קו אורך (לדוגמה: 32.0853, 34.7818)."))
     val saved = local.firstOrNull { it.point == point }
     val place = saved ?: Place("coordinate:${point.lat},${point.lon}", coordinateLabel(point),
-        "Coordinates: ${point.lat}, ${point.lon}", point, "coordinates")
+        tr("Coordinates: ${point.lat}, ${point.lon}","קואורדינטות: ${point.lat}, ${point.lon}"), point, "coordinates")
     return PlaceSearchResult(listOf(place))
 }
 
@@ -103,11 +112,11 @@ class PlaceSearch(private val primary:PlaceSearchProvider,private val fallback:P
     private val cache=LinkedHashMap<String,List<Place>>()
     private val mutex=Mutex()
     suspend fun search(query:String,near:Coordinate,local:List<Place> = emptyList(),expanded:Boolean=false):PlaceSearchResult = withContext(Dispatchers.Default) { mutex.withLock {
-        require(query.length<=256){"Use a shorter place name or address (up to 256 characters)."}
-        require(near.isValid()){"Waiting for a valid location."}
+        require(query.length<=256){tr("Use a shorter place name or address (up to 256 characters).","השתמשו בשם מקום או בכתובת קצרים יותר (עד 256 תווים).")}
+        require(near.isValid()){tr("Waiting for a valid location.","ממתינים למיקום תקין.")}
         coordinateSearchResult(query, local)?.let { return@withLock it }
         val effectiveQuery=aliases.resolve(query)
-        val aliasNote=if(effectiveQuery!=query)"Searching for $effectiveQuery" else null
+        val aliasNote=if(effectiveQuery!=query)tr("Searching for $effectiveQuery","מחפשים את $effectiveQuery") else null
         val variants=PlaceMatcher.variants(effectiveQuery)
         val key="${PlaceMatcher.normalize(query)}:${(near.lat*100).roundToInt()}:${(near.lon*100).roundToInt()}:$expanded"
         cache[key]?.let{return@withLock PlaceSearchResult(PlaceMatcher.ranked(effectiveQuery,near,it+local),aliasNote)}
@@ -124,20 +133,20 @@ class PlaceSearch(private val primary:PlaceSearchProvider,private val fallback:P
                 }
             } catch(e:CancellationException){throw e} catch(_:Exception){failures++}
         }
-        lookup(primary,variants.first())
+        lookup(primary,providerQuery(variants.first()))
         val primaryMatches=PlaceMatcher.ranked(effectiveQuery,near,candidates)
         if(fallback!=null && (expanded || primaryMatches.none{PlaceMatcher.score(effectiveQuery,it)>=.88})) {
-            lookup(fallback,variants.first())
-            if(variants.size>1 && PlaceMatcher.ranked(effectiveQuery,near,candidates).isEmpty())lookup(fallback,variants.last())
+            lookup(fallback,providerQuery(variants.first()))
+            if(variants.size>1 && PlaceMatcher.ranked(effectiveQuery,near,candidates).isEmpty())lookup(fallback,providerQuery(variants.last()))
         }
         val results=PlaceMatcher.ranked(effectiveQuery,near,candidates)
         // Saved/recent matches are supplied afresh: deleting one must not leave a cached copy.
         if(failures==0) { cache[key]=remote;while(cache.size>40)cache.remove(cache.keys.first()) }
         val note=when {
-            failures>0 && results.isEmpty() -> "Search service unavailable. Check your connection and try again."
-            failures>0 -> "Some search services are unavailable. Showing the matches found."
-            results.isEmpty() && completed>0 -> "No matching place found. Try an alternate spelling, add the town, or drop a pin on the map."
-            results.none{PlaceMatcher.score(effectiveQuery,it)>=.8} -> "Possible matches · check the name and address before choosing."
+            failures>0 && results.isEmpty() -> tr("Search service unavailable. Check your connection and try again.","שירות החיפוש אינו זמין. בדקו את החיבור לאינטרנט ונסו שוב.")
+            failures>0 -> tr("Some search services are unavailable. Showing the matches found.","חלק משירותי החיפוש אינם זמינים. מוצגות התוצאות שנמצאו.")
+            results.isEmpty() && completed>0 -> tr("No matching place found. Try an alternate spelling, add the town, or drop a pin on the map.","לא נמצא מקום מתאים. נסו כתיב אחר, הוסיפו את שם היישוב, או הניחו נעץ על המפה.")
+            results.none{PlaceMatcher.score(effectiveQuery,it)>=.8} -> tr("Possible matches · check the name and address before choosing.","התאמות אפשריות · בדקו את השם והכתובת לפני הבחירה.")
             else -> aliasNote
         }
         PlaceSearchResult(results,note)

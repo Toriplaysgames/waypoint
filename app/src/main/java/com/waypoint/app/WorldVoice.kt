@@ -58,13 +58,16 @@ internal class WorldVoiceNarrator(private val now: ()->Long={System.nanoTime()/1
     private val variations=mutableMapOf<Pair<World,Int>,Int>()
     private val arrival=Regex("^(you have |you've )?(arrived|reached your destination)\\b",RegexOption.IGNORE_CASE)
     private val urgent=Regex("\\b(now|immediately|recalculating|rerouting)\\b",RegexOption.IGNORE_CASE)
+    // Hebrew guidance has no ASCII word boundaries, so it is matched by phrase.
+    private val hebrewArrival=Regex("^\\u200F?(הגעתם|הגעה ליעד)")
+    private val hebrewUrgent=Regex("(עכשיו|מיד|מחשבים מסלול מחדש)")
     @Synchronized fun reset() { introduced=false;lastFlavour=null }
     @Synchronized fun decorate(instruction:SpokenInstruction,world:World?):SpokenInstruction {
         if(world==null || instruction.text.isBlank())return instruction
         val timestamp=now()
-        val isArrival=arrival.containsMatchIn(instruction.text)
+        val isArrival=arrival.containsMatchIn(instruction.text) || hebrewArrival.containsMatchIn(instruction.text)
         if(!isArrival && (!instruction.triggerDistanceBeforeManeuver.isFinite() ||
-            instruction.triggerDistanceBeforeManeuver<120.0 || urgent.containsMatchIn(instruction.text) ||
+            instruction.triggerDistanceBeforeManeuver<120.0 || urgent.containsMatchIn(instruction.text) || hebrewUrgent.containsMatchIn(instruction.text) ||
             instruction.text.length>180 || lastFlavour?.let { timestamp-it<45_000 }==true))return instruction
         val lines=world.voiceLines()
         val moment=if(isArrival)2 else if(!introduced)0 else 1

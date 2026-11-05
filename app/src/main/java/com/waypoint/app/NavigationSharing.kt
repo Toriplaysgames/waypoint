@@ -106,7 +106,7 @@ internal object NavigationSharing {
     fun open(context: Context, place: Place, mode: TravelMode) {
         val maps = Intent(Intent.ACTION_VIEW, Uri.parse(googleDirections(place, mode))).setPackage("com.google.android.apps.maps")
         val generic = Intent(Intent.ACTION_VIEW, Uri.parse("geo:${place.point.lat},${place.point.lon}?q=" + URLEncoder.encode("${place.point.lat},${place.point.lon} (${place.name.take(120)})", "UTF-8")))
-        val chooser = Intent.createChooser(generic, "Open in another map app")
+        val chooser = Intent.createChooser(generic, tr("Open in another map app","פתיחה באפליקציית מפות אחרת"))
         chooser.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, arrayOf(android.content.ComponentName(context, MainActivity::class.java)))
         val otherMaps = context.packageManager.queryIntentActivities(generic, android.content.pm.PackageManager.MATCH_DEFAULT_ONLY)
             .any { it.activityInfo.packageName != context.packageName }

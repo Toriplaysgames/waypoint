@@ -13,11 +13,17 @@ import kotlinx.coroutines.flow.StateFlow
 import uniffi.ferrostar.SpokenInstruction
 import java.util.Locale
 
-internal enum class GuidanceVoiceStatus(val problem: String? = null) {
+internal enum class GuidanceVoiceStatus(private val english: String? = null, private val hebrew: String? = null) {
     IDLE, STARTING, READY,
-    ENGINE_UNAVAILABLE("Voice could not start. Check the preferred text-to-speech engine in Android settings, then turn voice off and on to retry. Visual guidance is active."),
-    LANGUAGE_UNAVAILABLE("No English guidance voice is available. Choose or download an English voice in Android text-to-speech settings, then turn voice off and on to retry. Visual guidance is active."),
-    PLAYBACK_FAILED("Voice playback failed. Check Android text-to-speech settings and navigation volume, then turn voice off and on to retry. Visual guidance is active."),
+    ENGINE_UNAVAILABLE("Voice could not start. Check the preferred text-to-speech engine in Android settings, then turn voice off and on to retry. Visual guidance is active.",
+        "ההנחיות הקוליות לא הופעלו. בדקו את מנוע ההקראה המועדף בהגדרות Android, ואז כבו והפעילו את הקול כדי לנסות שוב. ההנחיות על המסך פעילות."),
+    LANGUAGE_UNAVAILABLE("No English guidance voice is available. Choose or download an English voice in Android text-to-speech settings, then turn voice off and on to retry. Visual guidance is active.",
+        "אין קול עברי להנחיות. בהגדרות ההקראה של Android בחרו מנוע שתומך בעברית (למשל „שירותי דיבור של Google”) והורידו קול עברי, ואז כבו והפעילו את הקול כדי לנסות שוב. ההנחיות על המסך פעילות."),
+    PLAYBACK_FAILED("Voice playback failed. Check Android text-to-speech settings and navigation volume, then turn voice off and on to retry. Visual guidance is active.",
+        "השמעת הקול נכשלה. בדקו את הגדרות ההקראה של Android ואת עוצמת הקול של הניווט, ואז כבו והפעילו את הקול כדי לנסות שוב. ההנחיות על המסך פעילות."),
+    ;
+    /** Read at display time so a language change never shows a stale message. */
+    val problem: String? get() = english?.let { tr(it, hebrew ?: it) }
 }
 
 /** Handles asynchronous engine startup without replaying a backlog of obsolete turns. */
@@ -119,14 +125,16 @@ internal fun androidGuidanceVoice(context: Context, world: () -> World? = { null
                         tts.setAudioAttributes(AudioAttributes.Builder()
                             .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
                             .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
-                        // Route instructions are currently English. Prefer the user's
-                        // English dialect, then any installed English variant.
+                        // Route instructions follow the app language. Prefer the user's
+                        // dialect, then the engine default and any installed variant.
                         val preferred = context.resources.configuration.locales[0]
+                        val wanted = if (AppLanguage.isHebrew) setOf("iw", "he") else setOf("en")
                         val locales = buildList {
-                            if (preferred.language == "en") add(preferred)
-                            tts.defaultVoice?.locale?.takeIf { it.language == "en" }?.let(::add)
-                            add(Locale.ENGLISH)
-                            addAll(tts.availableLanguages.orEmpty().filter { it.language == "en" }.sortedBy { it.toLanguageTag() })
+                            if (preferred.language in wanted) add(preferred)
+                            tts.defaultVoice?.locale?.takeIf { it.language in wanted }?.let(::add)
+                            add(AppLanguage.speechLocale)
+                            if (AppLanguage.isHebrew) add(Locale.forLanguageTag("iw-IL"))
+                            addAll(tts.availableLanguages.orEmpty().filter { it.language in wanted }.sortedBy { it.toLanguageTag() })
                         }.distinct()
                         if (locales.any { tts.setLanguage(it) >= TextToSpeech.LANG_AVAILABLE }) GuidanceVoiceStatus.READY
                         else GuidanceVoiceStatus.LANGUAGE_UNAVAILABLE

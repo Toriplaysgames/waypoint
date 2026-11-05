@@ -36,10 +36,10 @@ class HeadingSensor(context:Context,private val onHeading:(Float,Boolean,String)
     var displayRotation:Int=Surface.ROTATION_0
         set(value){if(field!=value){field=value;smoothed=null}}
     val description:String get()=when {
-        rotation?.type==Sensor.TYPE_ROTATION_VECTOR->"Gyroscope + accelerometer + compass"
-        rotation!=null->"Accelerometer + compass"
-        accelerometer!=null && magnetometer!=null->"Accelerometer + compass"
-        else->"Compass unavailable · GPS course only"
+        rotation?.type==Sensor.TYPE_ROTATION_VECTOR->tr("Gyroscope + accelerometer + compass","ג׳ירוסקופ + מד תאוצה + מצפן")
+        rotation!=null->tr("Accelerometer + compass","מד תאוצה + מצפן")
+        accelerometer!=null && magnetometer!=null->tr("Accelerometer + compass","מד תאוצה + מצפן")
+        else->tr("Compass unavailable · GPS course only","המצפן אינו זמין · רק כיוון תנועה מ-GPS")
     }
     fun updateLocation(location:Location) {
         val fix=Coordinate(location.latitude,location.longitude)
@@ -60,7 +60,7 @@ class HeadingSensor(context:Context,private val onHeading:(Float,Boolean,String)
             if(!a || !m)manager.unregisterListener(this)
             a && m
         } else false
-        if(!running)onHeading(0f,false,"Compass unavailable · GPS course only")
+        if(!running)onHeading(0f,false,tr("Compass unavailable · GPS course only","המצפן אינו זמין · רק כיוון תנועה מ-GPS"))
     }
     fun stop() { manager.unregisterListener(this);running=false;gravity=null;magnetic=null }
     override fun onAccuracyChanged(sensor:Sensor?,value:Int) {
@@ -92,6 +92,6 @@ class HeadingSensor(context:Context,private val onHeading:(Float,Boolean,String)
         lastEmit=now
         val reliable=projected!=null && accuracy>=SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM &&
             (headingErrorRadians==null || headingErrorRadians!!<=Math.toRadians(45.0))
-        onHeading(smoothed!!,reliable,if(reliable)if(declinationFix==null)"Compass · magnetic north" else "Compass · true north" else "Compass needs calibration · move away from magnets")
+        onHeading(smoothed!!,reliable,if(reliable)if(declinationFix==null)tr("Compass · magnetic north","מצפן · צפון מגנטי") else tr("Compass · true north","מצפן · צפון אמיתי") else tr("Compass needs calibration · move away from magnets","המצפן צריך כיול · התרחקו ממגנטים"))
     }
 }

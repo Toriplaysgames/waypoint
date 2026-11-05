@@ -26,7 +26,7 @@ import java.util.Locale
                     Spacer(Modifier.width(10.dp)); AtlasText("DARK ZONE", s.world, size = 26, color = p.accent)
                 }
                 AtlasText(s.city, s.world, size = 16)
-                AtlasText(s.fix?.let { String.format(Locale.ROOT,"%.4f° / %.4f°", it.lat, it.lon) } ?: "Choose a destination to begin", s.world, size = 13, color = p.muted)
+                AtlasText(s.fix?.let { String.format(Locale.ROOT,"%.4f° / %.4f°", it.lat, it.lon) } ?: tr("Choose a destination to begin","בחרו יעד כדי להתחיל"), s.world, size = 13, color = p.muted)
             }
         }
         AtlasFind(s.world, a)
@@ -37,7 +37,7 @@ import java.util.Locale
     }
     Column(Modifier.align(Alignment.BottomEnd).padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         CompassRose(if (s.headingReliable) s.bearing else Float.NaN, s.world, onRecenter = a.locate)
-        AtlasAction(s.world, "Locate", a.locate)
+        AtlasAction(s.world, tr("Locate","איתור"), a.locate)
     }
 }
 
@@ -51,18 +51,18 @@ import java.util.Locale
                 FixLabel(s)
             }
         }
-        AtlasFind(s.world, a, label = "Where shall we go?")
+        AtlasFind(s.world, a, label = tr("Where shall we go?","לאן נוסעים?"))
     }
     Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.SpaceBetween) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             CompassRose(heading, s.world, ornate = true, onRecenter = a.locate)
-            AtlasAction(s.world, "Locate", a.locate)
+            AtlasAction(s.world, tr("Locate","איתור"), a.locate)
         }
         Surface(color = p.panel, border = hudBorder(s.world)) {
             Column(Modifier.padding(4.dp)) {
-                AtlasAction(s.world, "Worlds", a.huds)
-                AtlasAction(s.world, "Saved places", a.saved)
-                AtlasAction(s.world, "Settings", a.settings)
+                AtlasAction(s.world, tr("Worlds","עולמות"), a.huds)
+                AtlasAction(s.world, tr("Saved places","מקומות שמורים"), a.saved)
+                AtlasAction(s.world, tr("Settings","הגדרות"), a.settings)
             }
         }
     }
@@ -78,13 +78,13 @@ import java.util.Locale
                 AtlasText(s.city, s.world, size = 14)
             }
         }
-        AtlasFind(s.world, a, label = "Find a place")
+        AtlasFind(s.world, a, label = tr("Find a place","חיפוש מקום"))
     }
     Surface(color = p.panel, border = hudBorder(s.world), modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(12.dp)) {
         Column(Modifier.padding(8.dp)) {
             FixLabel(s)
-            Row { AtlasAction(s.world, "Worlds", a.huds, Modifier.weight(1f)); AtlasAction(s.world, "Saved", a.saved, Modifier.weight(1f)) }
-            Row { AtlasAction(s.world, "Locate", a.locate, Modifier.weight(1f)); AtlasAction(s.world, "Settings", a.settings, Modifier.weight(1f)) }
+            Row { AtlasAction(s.world, tr("Worlds","עולמות"), a.huds, Modifier.weight(1f)); AtlasAction(s.world, tr("Saved","שמורים"), a.saved, Modifier.weight(1f)) }
+            Row { AtlasAction(s.world, tr("Locate","איתור"), a.locate, Modifier.weight(1f)); AtlasAction(s.world, tr("Settings","הגדרות"), a.settings, Modifier.weight(1f)) }
         }
     }
 }
@@ -106,14 +106,14 @@ import java.util.Locale
     }
     Surface(color = p.panel, shape = hudShape(s.world), border = hudBorder(s.world), modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
         Column(Modifier.padding(8.dp)) {
-            AtlasAction(s.world, "Worlds", a.huds)
-            AtlasAction(s.world, "Saved places", a.saved)
-            AtlasAction(s.world, "Settings", a.settings)
+            AtlasAction(s.world, tr("Worlds","עולמות"), a.huds)
+            AtlasAction(s.world, tr("Saved places","מקומות שמורים"), a.saved)
+            AtlasAction(s.world, tr("Settings","הגדרות"), a.settings)
         }
     }
     Column(Modifier.align(Alignment.BottomEnd).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         CompassRose(heading, s.world, ornate = true, onRecenter = a.locate)
-        AtlasAction(s.world, "Locate", a.locate)
+        AtlasAction(s.world, tr("Locate","איתור"), a.locate)
     }
 }
 
@@ -153,7 +153,7 @@ import java.util.Locale
         }
     }
     Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        AtlasFind(s.world, a, label = "Set a destination")
+        AtlasFind(s.world, a, label = tr("Set a destination","בחירת יעד"))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             AtlasTool(s.world, Icons.Default.Layers, "Worlds", a.huds)
             AtlasTool(s.world, Icons.Default.BookmarkBorder, "Saved", a.saved)
@@ -172,7 +172,7 @@ import java.util.Locale
             }
             Spacer(Modifier.width(12.dp)); CompassRose(heading, s.world, onRecenter = a.locate)
         }
-        AtlasFind(s.world, a, label = "Choose your destination")
+        AtlasFind(s.world, a, label = tr("Choose your destination","בחרו את היעד שלך"))
     }
     Column(Modifier.align(Alignment.BottomStart).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         FixLabel(s)
@@ -188,13 +188,13 @@ import java.util.Locale
             AtlasText("16-BIT QUEST", s.world, size = 22)
             AtlasText(s.city, s.world, size = 12, color = p.muted)
             FixLabel(s)
-            AtlasFind(s.world, a, label = "Find a place")
+            AtlasFind(s.world, a, label = tr("Find a place","חיפוש מקום"))
         }
     }
     Surface(color = p.panel, border = hudBorder(s.world), modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)) {
         Column(Modifier.padding(8.dp)) {
-            Row { AtlasAction(s.world, "Worlds", a.huds, Modifier.weight(1f)); AtlasAction(s.world, "Saved", a.saved, Modifier.weight(1f)) }
-            Row { AtlasAction(s.world, "Locate", a.locate, Modifier.weight(1f)); AtlasAction(s.world, "Settings", a.settings, Modifier.weight(1f)) }
+            Row { AtlasAction(s.world, tr("Worlds","עולמות"), a.huds, Modifier.weight(1f)); AtlasAction(s.world, tr("Saved","שמורים"), a.saved, Modifier.weight(1f)) }
+            Row { AtlasAction(s.world, tr("Locate","איתור"), a.locate, Modifier.weight(1f)); AtlasAction(s.world, tr("Settings","הגדרות"), a.settings, Modifier.weight(1f)) }
         }
     }
 }
@@ -204,7 +204,7 @@ import java.util.Locale
     Column(Modifier.align(Alignment.TopCenter).fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Surface(color = p.panel, shape = hudShape(s.world)) {
             Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("Where next?", fontFamily = SansFont, fontSize = 24.sp, color = p.foreground, fontWeight = FontWeight.SemiBold)
+                Text(tr("Where next?","לאן עכשיו?"), fontFamily = SansFont, fontSize = 24.sp, color = p.foreground, fontWeight = FontWeight.SemiBold)
                 Text(s.city, fontFamily = SansFont, fontSize = 14.sp, color = p.muted)
             }
         }

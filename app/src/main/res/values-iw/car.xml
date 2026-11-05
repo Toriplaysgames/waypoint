@@ -1,0 +1,42 @@
+<resources>
+    <string name="car_location_explanation">כשהרכב חונה, אפשרו מיקום מדויק בטלפון כדי לראות את המיקום ולנווט. אם דחיתם קודם, פתחו את הגדרות האפליקציה של Waypoint ← הרשאות ← מיקום, ובדקו שוב.</string>
+    <string name="car_allow_location">אישור מיקום</string>
+    <string name="car_check_permission">בדיקה חוזרת</string>
+    <string name="car_destinations">יעדים</string>
+    <string name="car_destination">יעד</string>
+    <string name="car_saved">מקומות שמורים</string>
+    <string name="car_recent">יעדים אחרונים</string>
+    <string name="car_search">חיפוש מקומות</string>
+    <string name="car_no_destinations">חפשו כאן יעד, או שמרו מקום בטלפון. המקומות מסונכרנים.</string>
+    <string name="car_places_removed">המקומות האלה כבר לא שמורים. חזרו כדי לבחור יעד אחר.</string>
+    <string name="car_through_place">דרך %1$s</string>
+    <plurals name="car_places"><item quantity="one">מקום אחד</item><item quantity="two">%d מקומות</item><item quantity="many">%d מקומות</item><item quantity="other">%d מקומות</item></plurals>
+    <string name="car_search_empty">חיפוש מקום או כתובת</string>
+    <string name="car_search_no_results">לא נמצאו מקומות. נסו יישוב סמוך או כתובת מלאה יותר.</string>
+    <string name="car_search_error">החיפוש אינו זמין. בדקו את החיבור ונסו שוב.</string>
+    <string name="car_imperial">מיילים ורגל</string>
+    <string name="car_map_world">עולם המפה</string>
+    <string name="car_current_world">העולם הנוכחי · משותף עם הטלפון</string>
+    <string name="car_world_cities">רחובות עיר</string>
+    <string name="car_world_roads">דרכים פתוחות</string>
+    <string name="car_world_fantasy">ארצות פנטזיה</string>
+    <string name="car_world_future">עולמות עתידיים</string>
+    <string name="car_world_tactical">מפות טקטיות</string>
+    <string name="car_world_classic">קלאסי ושובב</string>
+    <string name="car_settings_title">Android Auto</string>
+    <string name="car_connected">מחובר לרכב</string>
+    <string name="car_ready_to_connect">פתיחת Waypoint ברכב</string>
+    <string name="car_sync_explanation">העולם, המקומות השמורים, יחידות המרחק וההנחיות מסונכרנים עם הטלפון.</string>
+    <string name="car_connect_explanation">חברו את הטלפון ובחרו ב-Waypoint במסך האפליקציות של Android Auto.</string>
+    <string name="car_location_ready">מיקום מדויק מאושר</string>
+    <string name="car_location_ready_detail">\u200FWaypoint יכול להשתמש במיקום שלך למפה ולהוראות הפנייה.</string>
+    <string name="car_location_needed">נדרש מיקום מדויק</string>
+    <string name="car_location_needed_detail">אפשרו מיקום כשהרכב חונה לפני התחלת הניווט.</string>
+    <string name="car_distribution_explanation">לא מופיע במסך האפליקציות? בדיקה ברכב אמיתי דורשת התקנה מהימנה, כמו ערוץ בדיקה של Google Play. מצב מפתחים ומקורות לא ידועים לבדם לא מפעילים את Waypoint.</string>
+    <string name="car_open_settings">הגדרות Android Auto</string>
+    <string name="car_location_settings">ניהול הרשאת המיקום</string>
+    <string name="car_settings_unavailable">הגדרות Android Auto אינן זמינות. בדקו ש-Android Auto מותקן ופעיל בטלפון.</string>
+    <string name="car_group_current">נוכחי: %1$s</string>
+    <string name="car_group_examples">%1$s, %2$s ועוד</string>
+    <plurals name="car_world_count"><item quantity="one">עולם אחד</item><item quantity="two">%d עולמות</item><item quantity="many">%d עולמות</item><item quantity="other">%d עולמות</item></plurals>
+</resources>

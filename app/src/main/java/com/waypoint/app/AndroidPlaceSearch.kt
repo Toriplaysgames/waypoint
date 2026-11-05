@@ -15,7 +15,7 @@ class AndroidPlaceSearch(context:Context):PlaceSearchProvider {
     private val geocoder=Geocoder(context.applicationContext,Locale.getDefault())
     override suspend fun find(query:String,near:Coordinate):List<Place> {
         require(query.length in 2..256 && near.isValid())
-        if(!Geocoder.isPresent())throw IOException("Device search unavailable")
+        if(!Geocoder.isPresent())throw IOException(tr("Device search unavailable","החיפוש במכשיר אינו זמין"))
         val south=(near.lat-.25).coerceAtLeast(-90.0);val north=(near.lat+.25).coerceAtMost(90.0)
         val west=(near.lon-.3).coerceAtLeast(-180.0);val east=(near.lon+.3).coerceAtMost(180.0)
         val addresses=if(Build.VERSION.SDK_INT>=33)suspendCancellableCoroutine { continuation ->
@@ -24,7 +24,7 @@ class AndroidPlaceSearch(context:Context):PlaceSearchProvider {
                     if(continuation.isActive)continuation.resumeWith(Result.success(addresses.take(8)))
                 }
                 override fun onError(errorMessage:String?) {
-                    if(continuation.isActive)continuation.resumeWith(Result.failure(IOException("Device search unavailable")))
+                    if(continuation.isActive)continuation.resumeWith(Result.failure(IOException(tr("Device search unavailable","החיפוש במכשיר אינו זמין"))))
                 }
             })
         } else withContext(Dispatchers.IO) {
@@ -40,11 +40,11 @@ class AndroidPlaceSearch(context:Context):PlaceSearchProvider {
             // Some backends return only a Plus Code for a named junction. Keep the queried
             // text as an explicit address-result label, not a verified landmark name.
             val addressOnly=Regex("[23456789CFGHJMPQRVWX]{2,8}\\+[23456789CFGHJMPQRVWX]{2,}",RegexOption.IGNORE_CASE).matches(feature)
-            val name=if(addressOnly)"Address result for $query" else feature.ifBlank{clean(address.thoroughfare)}.ifBlank{clean(address.locality)}
+            val name=if(addressOnly)tr("Address result for $query","תוצאת כתובת עבור $query") else feature.ifBlank{clean(address.thoroughfare)}.ifBlank{clean(address.locality)}
             if(name.isBlank())return@mapNotNull null
             val label=clean(address.getAddressLine(0))
             Place("android:${point.lat},${point.lon}:$name",name,label,point,
-                if(name==address.locality || name==address.adminArea || name==address.countryName)"locality" else "geocoder", if(addressOnly)"Android geocoder · address match" else "Android geocoder")
+                if(name==address.locality || name==address.adminArea || name==address.countryName)"locality" else "geocoder", if(addressOnly)tr("Android geocoder · address match","המקודד של Android · התאמת כתובת") else tr("Android geocoder","המקודד של Android"))
         }
     }
 }

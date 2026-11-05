@@ -25,28 +25,28 @@ internal fun savedPlaceName(value: String): String? = value.trim().takeIf {
     var error by rememberSaveable { mutableStateOf(false) }
     LazyColumn(Modifier.fillMaxSize().background(Ink).statusBarsPadding(), contentPadding = PaddingValues(vertical = 24.dp)) {
         item {
-            Text("Your places", style = MaterialTheme.typography.displayMedium, modifier = Modifier.padding(horizontal = 24.dp))
-            Text("Your favourite destinations, with names you choose.",
+            Text(tr("Your places","המקומות שלך"), style = MaterialTheme.typography.displayMedium, modifier = Modifier.padding(horizontal = 24.dp))
+            Text(tr("Your favourite destinations, with names you choose.","היעדים המועדפים שלך, בשמות שבחרת."),
                 style = MaterialTheme.typography.bodyMedium, color = Muted, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
         }
         if (state.saved.isEmpty()) item { Column(Modifier.fillMaxWidth().padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
             Spacer(Modifier.height(36.dp))
             Icon(Icons.Default.Bookmarks, null, tint = state.world.accent, modifier = Modifier.size(48.dp))
-            Text("No saved places yet", style = MaterialTheme.typography.titleLarge)
-            Text("Search for a destination and tap the bookmark to keep it here.", color = Muted, style = MaterialTheme.typography.bodyMedium)
-            Button(onClick = onSearch) { Text("Find a place") }
+            Text(tr("No saved places yet","עדיין אין מקומות שמורים"), style = MaterialTheme.typography.titleLarge)
+            Text(tr("Search for a destination and tap the bookmark to keep it here.","חפשו יעד והקישו על סימן השמירה כדי לשמור אותו כאן."), color = Muted, style = MaterialTheme.typography.bodyMedium)
+            Button(onClick = onSearch) { Text(tr("Find a place","חיפוש מקום")) }
         } }
         items(state.saved, key = { it.id }) { place ->
             var menu by remember { mutableStateOf(false) }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f)) { PlaceRow(place, state, onSelect) }
                 Box {
-                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, "Options for ${place.name}", tint = Cream) }
+                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, tr("Options for ${place.name}","אפשרויות עבור ${place.name}"), tint = Cream) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(text = { Text("Rename") }, leadingIcon = { Icon(Icons.Default.Edit, null) },
+                        DropdownMenuItem(text = { Text(tr("Rename","שינוי שם")) }, leadingIcon = { Icon(Icons.Default.Edit, null) },
                             onClick = { menu = false; label = place.name; error = false; editingId = place.id })
-                        DropdownMenuItem(text = { Text("Remove from saved") }, leadingIcon = { Icon(Icons.Default.BookmarkRemove, null) },
+                        DropdownMenuItem(text = { Text(tr("Remove from saved","הסרה מהשמורים")) }, leadingIcon = { Icon(Icons.Default.BookmarkRemove, null) },
                             onClick = { menu = false; onDelete(place) })
                     }
                 }
@@ -54,16 +54,16 @@ internal fun savedPlaceName(value: String): String? = value.trim().takeIf {
         }
     }
     state.saved.firstOrNull { it.id == editingId }?.let { place ->
-        AlertDialog(onDismissRequest = { editingId = null }, title = { Text("Name this place") },
+        AlertDialog(onDismissRequest = { editingId = null }, title = { Text(tr("Name this place","מתן שם למקום")) },
             text = { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(place.address, style = MaterialTheme.typography.bodyMedium)
+                Text(place.shownAddress, style = MaterialTheme.typography.bodyMedium)
                 OutlinedTextField(label, onValueChange = { label = it.take(SAVED_PLACE_NAME_LIMIT); error = false },
-                    label = { Text("Place name") }, placeholder = { Text("For example, Work") }, singleLine = true,
-                    isError = error, supportingText = { Text(if(error) "Enter a name for this place." else "Only the name changes. The location stays the same.") },
+                    label = { Text(tr("Place name","שם המקום")) }, placeholder = { Text(tr("For example, Work","לדוגמה: עבודה")) }, singleLine = true,
+                    isError = error, supportingText = { Text(if(error) tr("Enter a name for this place.","הזינו שם למקום הזה.") else tr("Only the name changes. The location stays the same.","רק השם משתנה. המיקום נשאר אותו מיקום.")) },
                     modifier = Modifier.fillMaxWidth())
             } },
             confirmButton = { TextButton(onClick = { if(onRename(place.id, label)) editingId = null else error = true },
-                enabled = savedPlaceName(label) != null) { Text("Save name") } },
-            dismissButton = { TextButton(onClick = { editingId = null }) { Text("Cancel") } })
+                enabled = savedPlaceName(label) != null) { Text(tr("Save name","שמירת השם")) } },
+            dismissButton = { TextButton(onClick = { editingId = null }) { Text(tr("Cancel","ביטול")) } })
     }
 }

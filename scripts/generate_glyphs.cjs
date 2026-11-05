@@ -9,6 +9,21 @@ for(const [name,sha256] of Object.entries({
  if(createHash('sha256').update(fs.readFileSync(path.join(tool,name))).digest('hex')!==sha256)
   throw new Error(`Unreviewed glyph generator: ${name}. Review provenance before updating the hash.`);
 }
+// Hebrew faces fill the 1280-1535 range so Israeli street and place names render.
+// Static subsets of OFL fonts, documented in tools/glyph-generation/hebrew/README.md.
+const hebrew={
+ 'Waypoint Condensed':'noto_sans_hebrew_condensed_medium.ttf',
+ 'Waypoint Technical':'heebo_medium.ttf',
+ 'Waypoint Pixel':'monocraft_hebrew.ttf',
+ 'Waypoint Retro':'noto_sans_hebrew_regular.ttf',
+ 'Waypoint Borda':'heebo_medium.ttf',
+ 'Waypoint Stratum':'noto_sans_hebrew_condensed_semibold.ttf',
+ 'Waypoint Futura':'noto_sans_hebrew_condensed_medium.ttf',
+ 'Waypoint Terminal':'noto_sans_hebrew_regular.ttf',
+ 'Waypoint Atlas':'frank_ruhl_libre_regular.ttf',
+ 'Waypoint Classic':'noto_sans_hebrew_regular.ttf',
+ 'Waypoint Western':'frank_ruhl_libre_semibold.ttf'
+};
 const fonts={
  'Waypoint Condensed':'roboto_condensed.ttf',
  'Waypoint Technical':'rajdhani.ttf',
@@ -31,8 +46,9 @@ const fonts={
  const create=name=>{const bytes=Buffer.from(name+'\0');const ptr=mod._malloc(bytes.length);mod.HEAPU8.set(bytes,ptr);const stack=mod._create_fontstack(ptr);mod._free(ptr);return stack;};
  for(const [name,file] of Object.entries(fonts)){
   const stack=create(name),ptrs=[];
-  for(const f of [file,'noto_sans.ttf']){
-   const bytes=fs.readFileSync(path.join(root,'app/src/main/res/font',f));const ptr=mod._malloc(bytes.length);ptrs.push(ptr);mod.HEAPU8.set(bytes,ptr);mod._fontstack_add_face(stack,ptr,bytes.length);
+  const faces=[path.join(root,'app/src/main/res/font',file),path.join(root,'app/src/main/res/font','noto_sans.ttf'),path.join(tool,'hebrew',hebrew[name])];
+  for(const f of faces){
+   const bytes=fs.readFileSync(f);const ptr=mod._malloc(bytes.length);ptrs.push(ptr);mod.HEAPU8.set(bytes,ptr);mod._fontstack_add_face(stack,ptr,bytes.length);
   }
   const dir=path.join(root,'app/src/main/assets/glyphs',name);fs.mkdirSync(dir,{recursive:true});
   // Other scripts retain provider Noto coverage through the native resolver.

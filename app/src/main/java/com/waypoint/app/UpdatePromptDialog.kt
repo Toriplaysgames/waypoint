@@ -42,22 +42,22 @@ fun UpdatePromptDialog(
     AlertDialog(
         onDismissRequest = onLater,
         containerColor = Panel,
-        title = { Text("Waypoint update available") },
+        title = { Text(tr("Waypoint update available","יש עדכון ל-Waypoint")) },
         text = {
             Column(
                 Modifier.fillMaxWidth().heightIn(max = 360.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text("Version ${release.version} is ready. Review what's new, then download it. Android will ask before installation.", style = MaterialTheme.typography.bodyMedium)
-                Text("$size MB · SHA-256 verified before installation", style = MaterialTheme.typography.bodySmall, color = Muted)
+                Text(tr("Version ${release.version} is ready. Review what's new, then download it. Android will ask before installation.","גרסה ${release.version} מוכנה. עברו על החידושים ואז הורידו אותה. Android יבקש אישור לפני ההתקנה."), style = MaterialTheme.typography.bodyMedium)
+                Text(tr("$size MB · SHA-256 verified before installation","$size MB · נבדק ב-SHA-256 לפני ההתקנה"), style = MaterialTheme.typography.bodySmall, color = Muted)
                 if (release.notes.isNotBlank()) ReleaseNotesContent(release.notes)
                 when (val current = status) {
                     is UpdateStatus.Downloading -> {
                         LinearProgressIndicator(progress = { current.percent / 100f }, modifier = Modifier.fillMaxWidth())
-                        Text(if (current.percent == 100) "Verifying the APK…" else "Downloading · ${current.percent}%", style = MaterialTheme.typography.bodySmall)
-                        TextButton(onClick = updater::cancel, modifier = Modifier.heightIn(min = 48.dp)) { Text("Cancel download") }
+                        Text(if (current.percent == 100) tr("Verifying the APK…","מאמתים את קובץ ה-APK…") else tr("Downloading · ${current.percent}%","מורידים · ${current.percent}%"), style = MaterialTheme.typography.bodySmall)
+                        TextButton(onClick = updater::cancel, modifier = Modifier.heightIn(min = 48.dp)) { Text(tr("Cancel download","ביטול ההורדה")) }
                     }
-                    is UpdateStatus.Ready -> Text("Verified and ready. Android will show its installation confirmation.", style = MaterialTheme.typography.bodySmall)
+                    is UpdateStatus.Ready -> Text(tr("Verified and ready. Android will show its installation confirmation.","אומת ומוכן. Android יציג את אישור ההתקנה שלו."), style = MaterialTheme.typography.bodySmall)
                     is UpdateStatus.Failed -> Text(current.message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                     else -> Unit
                 }
@@ -72,7 +72,7 @@ fun UpdatePromptDialog(
                     modifier = Modifier.heightIn(min = 48.dp),
                 ) {
                     androidx.compose.material3.Icon(Icons.Default.SystemUpdate, null)
-                    Text("Install update")
+                    Text(tr("Install update","התקנת העדכון"))
                 }
                 is UpdateStatus.Downloading -> Unit
                 else -> Button(
@@ -80,12 +80,12 @@ fun UpdatePromptDialog(
                     modifier = Modifier.heightIn(min = 48.dp),
                 ) {
                     androidx.compose.material3.Icon(Icons.Default.Download, null)
-                    Text(if (current is UpdateStatus.Failed) "Try download again" else "Download update")
+                    Text(if (current is UpdateStatus.Failed) tr("Try download again","ניסיון הורדה חוזר") else tr("Download update","הורדת העדכון"))
                 }
             }
         },
         dismissButton = {
-            Row { TextButton(onClick = onLater, modifier = Modifier.heightIn(min = 48.dp)) { Text("Later") } }
+            Row { TextButton(onClick = onLater, modifier = Modifier.heightIn(min = 48.dp)) { Text(tr("Later","אחר כך")) } }
         },
     )
 }

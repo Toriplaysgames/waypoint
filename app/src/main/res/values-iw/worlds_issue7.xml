@@ -1,0 +1,11 @@
+<resources>
+    <string name="world_division_description">משואות מסלול בכתום, אטלס עיר מוטה ולוח בקרה טקטי קומפקטי.</string>
+    <string name="world_sea_chart_description">מפה ימית מנייר עם דרכים בדיו, שושנת רוחות ומסלול אדום.</string>
+    <string name="world_dos_atlas_description">כיתוב בענבר, מסגרות מסוף ומפת רחובות ברורה. בלי פקודות ללמוד.</string>
+    <string name="world_aincrad_description">לוחות משימה בהירים, צבעי אטלס חמים וממשק רגוע לפרק הבא שלכם.</string>
+    <string name="world_counter_strike_description">תצוגת מכ״ם שטוחה וקרובה עם קווי מתאר חזקים לבניינים וסמני כיוון ברורים.</string>
+    <string name="world_defcon_description">מפה וקטורית שקטה עם קווי מתאר כחולים וניווט מדויק וקריא.</string>
+    <string name="world_field_ops_description">מפת תדריך שטח עם תבליט עמום, פס מצפן ופקדים מעשיים.</string>
+    <string name="world_retro_quest_description">אטלס הרפתקאות צבעוני של 16 ביט עם כיתוב פיקסלים ורחובות אמיתיים.</string>
+    <string name="world_home_console_description">לוחות בהירים, כפתורים מעוגלים ומפה מזמינה בסגנון קונסולה.</string>
+</resources>

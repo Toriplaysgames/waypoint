@@ -13,11 +13,11 @@ internal fun releaseCheckCall(client:OkHttpClient):Call = client.newCall(Request
 /** Shared bounded response/parser for automatic alerts and foreground update checks. */
 internal fun readReleaseCheck(call:Call):ReleaseUpdate? = call.execute().use { response ->
     when(response.code) {
-        404 -> throw IOException("No public release is available yet. Try again after the first build is published.")
-        403,429 -> throw IOException("GitHub's update limit was reached. Please try again later.")
+        404 -> throw IOException(tr("No public release is available yet. Try again after the first build is published.","עדיין אין גרסה ציבורית. נסו שוב אחרי שתפורסם הגרסה הראשונה."))
+        403,429 -> throw IOException(tr("GitHub's update limit was reached. Please try again later.","הגענו למגבלת הבדיקות של GitHub. נסו שוב מאוחר יותר."))
     }
-    if(!response.isSuccessful)throw IOException("GitHub is unavailable (${response.code}). Please try again.")
-    val body=response.body ?: throw IOException("GitHub returned an empty response.")
+    if(!response.isSuccessful)throw IOException(tr("GitHub is unavailable (${response.code}). Please try again.","GitHub אינו זמין (${response.code}). נסו שוב."))
+    val body=response.body ?: throw IOException(tr("GitHub returned an empty response.","GitHub החזיר תשובה ריקה."))
     val bytes=body.byteStream().use { input ->
         val output=java.io.ByteArrayOutputStream()
         val buffer=ByteArray(8192)
@@ -28,6 +28,6 @@ internal fun readReleaseCheck(call:Call):ReleaseUpdate? = call.execute().use { r
         }
         output.toByteArray()
     }
-    require(bytes.size<=1_000_000) { "The release response is too large." }
+    require(bytes.size<=1_000_000) { tr("The release response is too large.","התשובה על הגרסה גדולה מדי.") }
     ReleaseUpdate.parse(bytes.toString(Charsets.UTF_8),BuildConfig.VERSION_CODE)
 }

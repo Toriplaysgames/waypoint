@@ -17,8 +17,8 @@ class QuestReminders(private val context: Context, private val repository: Quest
     private var scheduled = emptySet<String>()
     init {
         notifications.createNotificationChannels(listOf(
-            NotificationChannel("quest_reminders", "Quest reminders", NotificationManager.IMPORTANCE_DEFAULT),
-            NotificationChannel("focus_alerts", "Focus alerts", NotificationManager.IMPORTANCE_DEFAULT)
+            NotificationChannel("quest_reminders", tr("Quest reminders","תזכורות למשימות"), NotificationManager.IMPORTANCE_DEFAULT),
+            NotificationChannel("focus_alerts", tr("Focus alerts","התראות ריכוז"), NotificationManager.IMPORTANCE_DEFAULT)
         ))
     }
     fun canNotify() = NotificationManagerCompat.from(context).areNotificationsEnabled() &&
@@ -73,18 +73,18 @@ class QuestReminders(private val context: Context, private val repository: Quest
             .setContentTitle(quest.title).setContentText(text).setContentIntent(open(quest.id))
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setAutoCancel(true).setSilent(quiet).setOnlyAlertOnce(true)
-            .addAction(0, "Open quest", open(quest.id))
-            .addAction(0, "Complete", action(quest, "COMPLETE"))
-            .addAction(0, "Snooze 10 min", action(quest, "SNOOZE")).build()
+            .addAction(0, tr("Open quest","פתיחת המשימה"), open(quest.id))
+            .addAction(0, tr("Complete","השלמה"), action(quest, "COMPLETE"))
+            .addAction(0, tr("Snooze 10 min","נודניק ל-10 דק׳"), action(quest, "SNOOZE")).build()
     }
     fun showReminder(quest: QuestRecord) {
         if (!canNotify()) return
-        try { notifications.notify("quest:${quest.id}", 31, notification(quest, "quest_reminders", "A little reminder for your quest.")) } catch (_: SecurityException) { }
+        try { notifications.notify("quest:${quest.id}", 31, notification(quest, "quest_reminders", tr("A little reminder for your quest.","תזכורת קטנה למשימה שלך."))) } catch (_: SecurityException) { }
     }
     suspend fun showFocus(focus: FocusRecord) {
         if (!focus.alerts || !canNotify()) return
         val quest = repository.dao.quest(focus.questId)?.takeIf { it.completedAt == null } ?: return
-        try { notifications.notify("focus:${quest.id}", 32, notification(quest, "focus_alerts", "Your focus time is finished. Ready to complete this quest?")) } catch (_: SecurityException) { }
+        try { notifications.notify("focus:${quest.id}", 32, notification(quest, "focus_alerts", tr("Your focus time is finished. Ready to complete this quest?","זמן הריכוז הסתיים. מוכנים להשלים את המשימה?"))) } catch (_: SecurityException) { }
     }
 }
 

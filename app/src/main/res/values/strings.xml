@@ -46,5 +46,6 @@
         <item quantity="other">%d selected</item>
     </plurals>
     <string name="game_selected">Selected</string>
+    <string name="find_in_waypoint">Find in Waypoint</string>
     <string name="game_not_selected">Not selected</string>
 </resources>

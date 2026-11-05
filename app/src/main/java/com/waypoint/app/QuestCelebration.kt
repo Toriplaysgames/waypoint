@@ -61,17 +61,17 @@ import kotlinx.coroutines.delay
             shape = hudShape(world), border = hudBorder(world), tonalElevation = 6.dp, shadowElevation = 4.dp) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    QuestPortrait(quest ?: QuestRecord(title = "Your journey"), Modifier.size(44.dp), snapshot.profile.frame.takeIf { it in snapshot.progress.frames } ?: "Simple")
+                    QuestPortrait(quest ?: QuestRecord(title = tr("Your journey","המסע שלך")), Modifier.size(44.dp), snapshot.profile.frame.takeIf { it in snapshot.progress.frames } ?: "Simple")
                     Column(Modifier.weight(1f)) {
-                        Text(if (rewards.size == 1) "Quest complete" else "${rewards.size} quests completed", style = MaterialTheme.typography.titleLarge)
-                        Text("+${rewards.sumOf { it.xp }} XP · Level ${snapshot.progress.level}", color = MaterialTheme.colorScheme.primary)
+                        Text(if (rewards.size == 1) tr("Quest complete","המשימה הושלמה") else tr("${rewards.size} quests completed","${rewards.size} משימות הושלמו"), style = MaterialTheme.typography.titleLarge)
+                        Text(tr("+${rewards.sumOf { it.xp }} XP · Level ${snapshot.progress.level}","+${rewards.sumOf { it.xp }} XP · רמה ${snapshot.progress.level}"), color = MaterialTheme.colorScheme.primary)
                     }
-                    IconButton(onClick = ::dismiss) { Icon(Icons.Default.Close, "Dismiss reward") }
+                    IconButton(onClick = ::dismiss) { Icon(Icons.Default.Close, tr("Dismiss reward","סגירת הפרס")) }
                 }
-                Text(quest?.title ?: "Your rewards are ready. Take a moment to enjoy your progress.", maxLines = 2)
+                Text(quest?.title ?: tr("Your rewards are ready. Take a moment to enjoy your progress.","הפרסים שלך מוכנים. קחו רגע ליהנות מההתקדמות."), maxLines = 2)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (rewards.size == 1 && quest != null) TextButton(onClick = { controller.reopen(quest.id); dismiss() }) { Text("Undo") }
-                    TextButton(onClick = { dismiss(); onOpen() }) { Text("View quests") }
+                    if (rewards.size == 1 && quest != null) TextButton(onClick = { controller.reopen(quest.id); dismiss() }) { Text(tr("Undo","ביטול")) }
+                    TextButton(onClick = { dismiss(); onOpen() }) { Text(tr("View quests","הצגת המשימות")) }
                 }
             }
         }

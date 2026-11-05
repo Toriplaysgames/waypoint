@@ -41,7 +41,7 @@ class AppUpdater(private val context: Context) {
     private val directory get() = File(context.cacheDir, "updates").apply { mkdirs() }
     private val client = OkHttpClient.Builder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS).callTimeout(5, TimeUnit.MINUTES)
         .addNetworkInterceptor { chain ->
-            if (!ReleaseUpdate.trustedDownloadHost(chain.request().url.toString())) throw IOException("Untrusted update server.")
+            if (!ReleaseUpdate.trustedDownloadHost(chain.request().url.toString())) throw IOException(tr("Untrusted update server.","שרת העדכונים אינו מהימן."))
             chain.proceed(chain.request())
         }.build()
 
@@ -78,12 +78,12 @@ class AppUpdater(private val context: Context) {
             try {
                 withContext(Dispatchers.IO) {
                     target.delete(); partial.delete()
-                    require(directory.usableSpace > release.size + 10 * 1024 * 1024) { "Not enough free space. Free some storage and try again." }
+                    require(directory.usableSpace > release.size + 10 * 1024 * 1024) { tr("Not enough free space. Free some storage and try again.","אין מספיק מקום פנוי. פנו מקום באחסון ונסו שוב.") }
                     val digest = MessageDigest.getInstance("SHA-256")
                     val request = Request.Builder().url(release.url).header("User-Agent", "Waypoint/${BuildConfig.VERSION_NAME}").build()
                     client.newCall(request).also { call = it }.execute().use { response ->
-                        if (!response.isSuccessful) throw IOException("The download failed (${response.code}). Please try again.")
-                        val body = response.body ?: throw IOException("The download was empty.")
+                        if (!response.isSuccessful) throw IOException(tr("The download failed (${response.code}). Please try again.","ההורדה נכשלה (${response.code}). נסו שוב."))
+                        val body = response.body ?: throw IOException(tr("The download was empty.","הקובץ שהורד ריק."))
                         var received = 0L
                         body.byteStream().use { input -> partial.outputStream().use { output ->
                             val buffer = ByteArray(64 * 1024)
@@ -92,18 +92,18 @@ class AppUpdater(private val context: Context) {
                                 val count = input.read(buffer)
                                 if (count < 0) break
                                 received += count
-                                require(received <= release.size && received <= ReleaseUpdate.MAX_BYTES) { "The update is larger than expected." }
+                                require(received <= release.size && received <= ReleaseUpdate.MAX_BYTES) { tr("The update is larger than expected.","העדכון גדול מהצפוי.") }
                                 output.write(buffer, 0, count); digest.update(buffer, 0, count)
                                 currentCoroutineContext().ensureActive()
                                 mutable.value = UpdateStatus.Downloading(release, (received * 100 / release.size).toInt())
                             }
                         } }
-                        require(received == release.size) { "The download was incomplete. Please try again." }
+                        require(received == release.size) { tr("The download was incomplete. Please try again.","ההורדה לא הושלמה. נסו שוב.") }
                     }
                     val actual = digest.digest().joinToString("") { "%02x".format(it) }
-                    require(actual == release.sha256) { "Update verification failed. The file was discarded; please try again." }
+                    require(actual == release.sha256) { tr("Update verification failed. The file was discarded; please try again.","אימות העדכון נכשל. הקובץ נמחק; נסו שוב.") }
                     verifyApk(partial, release)
-                    check(partial.renameTo(target)) { "The update could not be saved. Please try again." }
+                    check(partial.renameTo(target)) { tr("The update could not be saved. Please try again.","לא הצלחנו לשמור את העדכון. נסו שוב.") }
                 }
                 mutable.value = UpdateStatus.Ready(release, target)
             } catch (e: CancellationException) { throw e }
@@ -123,31 +123,31 @@ class AppUpdater(private val context: Context) {
         verifyApk(ready.file, ready.release)
         if (!context.packageManager.canRequestPackageInstalls()) {
             activity.startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${context.packageName}")))
-            "Allow updates from Waypoint, then return and tap Install update."
+            tr("Allow updates from Waypoint, then return and tap Install update.","אפשרו עדכונים מ-Waypoint, ואז חזרו והקישו על „התקנת העדכון”.")
         } else {
             val uri = FileProvider.getUriForFile(context, "${context.packageName}.updates", ready.file)
             activity.startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(uri, "application/vnd.android.package-archive")
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
             null
         }
-    } catch (e: Exception) { "Android couldn't open this update. Check installation permissions and try again." }
+    } catch (e: Exception) { tr("Android couldn't open this update. Check installation permissions and try again.","Android לא הצליח לפתוח את העדכון. בדקו את הרשאות ההתקנה ונסו שוב.") }
 
     @Suppress("DEPRECATION")
     private fun verifyApk(file: File, release: ReleaseUpdate) {
         val flags = if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES else PackageManager.GET_SIGNATURES
-        val candidate = requireNotNull(context.packageManager.getPackageArchiveInfo(file.absolutePath, flags)) { "The download isn't a valid Android app." }
+        val candidate = requireNotNull(context.packageManager.getPackageArchiveInfo(file.absolutePath, flags)) { tr("The download isn't a valid Android app.","הקובץ שהורד אינו אפליקציית Android תקינה.") }
         val installed = context.packageManager.getPackageInfo(context.packageName, flags)
-        require(candidate.packageName == context.packageName && candidate.versionName == release.version) { "The download is not this Waypoint release." }
+        require(candidate.packageName == context.packageName && candidate.versionName == release.version) { tr("The download is not this Waypoint release.","הקובץ שהורד אינו הגרסה הזאת של Waypoint.") }
         val code = if (Build.VERSION.SDK_INT >= 28) candidate.longVersionCode else candidate.versionCode.toLong()
-        require(code == release.versionCode.toLong() && code > BuildConfig.VERSION_CODE) { "The download is not a newer version." }
+        require(code == release.versionCode.toLong() && code > BuildConfig.VERSION_CODE) { tr("The download is not a newer version.","הקובץ שהורד אינו גרסה חדשה יותר.") }
         fun signatures(info: PackageInfo): Set<String> = (if (Build.VERSION.SDK_INT >= 28) info.signingInfo?.apkContentsSigners else info.signatures)
             .orEmpty().map { it.toCharsString() }.toSet()
         val expected = signatures(installed)
-        require(expected.isNotEmpty() && signatures(candidate) == expected) { "This update has a different signing identity and cannot replace your app." }
+        require(expected.isNotEmpty() && signatures(candidate) == expected) { tr("This update has a different signing identity and cannot replace your app.","לעדכון יש חתימה שונה, ולכן הוא לא יכול להחליף את האפליקציה שלך.") }
     }
     private fun friendlyError(e: Exception) = when (e) {
-        is java.net.UnknownHostException -> "You're offline. Connect to the internet and check again."
-        is java.net.SocketTimeoutException -> "The connection timed out. Please try again."
-        else -> e.message?.take(220) ?: "The update could not be checked. Please try again."
+        is java.net.UnknownHostException -> tr("You're offline. Connect to the internet and check again.","אין חיבור לאינטרנט. התחברו ובדקו שוב.")
+        is java.net.SocketTimeoutException -> tr("The connection timed out. Please try again.","תם הזמן לחיבור. נסו שוב.")
+        else -> e.message?.take(220) ?: tr("The update could not be checked. Please try again.","לא הצלחנו לבדוק אם יש עדכון. נסו שוב.")
     }
 }

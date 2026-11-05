@@ -16,13 +16,13 @@ class NavigationService : Service() {
     override fun onCreate() {
         super.onCreate()
         serviceSessionId=controller.navigationSessionId
-        getSystemService(NotificationManager::class.java).createNotificationChannel(NotificationChannel("navigation","Active navigation",NotificationManager.IMPORTANCE_LOW))
-        startForeground(10,notification("Navigation is starting"))
+        getSystemService(NotificationManager::class.java).createNotificationChannel(NotificationChannel("navigation",tr("Active navigation","ניווט פעיל"),NotificationManager.IMPORTANCE_LOW))
+        startForeground(10,notification(tr("Navigation is starting","הניווט מתחיל")))
         scope.launch {
             controller.state.map { s ->
                 if(!s.navigating)null else if(!s.gpsReady)s.gpsStatus
-                else if(s.routing)"Rerouting from your current position"
-                else if(s.offRoute)"Off route · finding a new route"
+                else if(s.routing)tr("Rerouting from your current position","מחשבים מסלול מחדש מהמיקום הנוכחי")
+                else if(s.offRoute)tr("Off route · finding a new route","מחוץ למסלול · מחפשים מסלול חדש")
                 else routeGuidance(s.route,s.progress).instruction
             }.distinctUntilChanged().collect { text ->
                 if(text!=null)getSystemService(NotificationManager::class.java).notify(10,notification(text))
@@ -37,10 +37,10 @@ class NavigationService : Service() {
             .putExtra("navigation_session",token)
         val stop=PendingIntent.getService(this,1,stopIntent,PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         return NotificationCompat.Builder(this,"navigation").setSmallIcon(R.drawable.ic_navigation)
-            .setContentTitle("Waypoint · ${controller.state.value.selected?.name ?: "Navigation"}")
+            .setContentTitle("Waypoint · ${controller.state.value.selected?.name ?: tr("Navigation","ניווט")}")
             .setContentText(text).setContentIntent(open).setOngoing(true).setOnlyAlertOnce(true)
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-            .setCategory(NotificationCompat.CATEGORY_NAVIGATION).addAction(0,"End navigation",stop).build()
+            .setCategory(NotificationCompat.CATEGORY_NAVIGATION).addAction(0,tr("End navigation","סיום הניווט"),stop).build()
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if(intent?.action!="STOP")serviceSessionId=controller.navigationSessionId

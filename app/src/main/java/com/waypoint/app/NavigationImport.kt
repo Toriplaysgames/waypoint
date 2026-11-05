@@ -41,7 +41,7 @@ internal sealed interface NavigationImport {
 }
 
 internal fun coordinateLabel(point: Coordinate): String =
-    "Location at ${String.format(Locale.ROOT,"%.5f",point.lat)}, ${String.format(Locale.ROOT,"%.5f",point.lon)}"
+    tr("Location at ${String.format(Locale.ROOT,"%.5f",point.lat)}, ${String.format(Locale.ROOT,"%.5f",point.lon)}","מיקום ב-${String.format(Locale.ROOT,"%.5f",point.lat)}, ${String.format(Locale.ROOT,"%.5f",point.lon)}")
 
 /** A result belongs only to the most recent import and the navigation state it started in. */
 internal class NavigationImportGate {

@@ -28,7 +28,7 @@ data class QuestRecord(
     fun place(): Place? {
         val point = Coordinate(latitude ?: return null, longitude ?: return null)
         if (!point.isValid()) return null
-        return Place("quest:$id", placeName ?: "Quest destination", placeAddress.orEmpty(), point)
+        return Place("quest:$id", placeName ?: tr("Quest destination","יעד המשימה"), placeAddress.orEmpty(), point)
     }
 }
 

@@ -38,9 +38,9 @@ internal fun decodePolyline6(encoded: String): List<Coordinate> {
         var result=0L
         var shift=0
         while(true) {
-            require(cursor<encoded.length && shift<=35) { "The route geometry is invalid. Try again." }
+            require(cursor<encoded.length && shift<=35) { tr("The route geometry is invalid. Try again.","צורת המסלול שגויה. נסו שוב.") }
             val chunk=encoded[cursor++].code-63
-            require(chunk in 0..63) { "The route geometry is invalid. Try again." }
+            require(chunk in 0..63) { tr("The route geometry is invalid. Try again.","צורת המסלול שגויה. נסו שוב.") }
             result=result or ((chunk and 31).toLong() shl shift)
             if(chunk<32)break
             shift+=5
@@ -49,10 +49,10 @@ internal fun decodePolyline6(encoded: String): List<Coordinate> {
     }
     return buildList {
         while(cursor<encoded.length) {
-            require(size<50_000) { "This route is too short or too complex. Choose a closer destination." }
+            require(size<50_000) { tr("This route is too short or too complex. Choose a closer destination.","המסלול קצר או מורכב מדי. בחרו יעד קרוב יותר.") }
             lat+=value();lon+=value()
             add(Coordinate(lat/1_000_000.0,lon/1_000_000.0).also {
-                require(it.isValid()) { "The map service returned invalid coordinates. Try again." }
+                require(it.isValid()) { tr("The map service returned invalid coordinates. Try again.","שירות המפות החזיר קואורדינטות שגויות. נסו שוב.") }
             })
         }
     }
@@ -62,6 +62,9 @@ internal fun ferrostarRouteFromOsrm(route: JSONObject, from: Coordinate, to: Coo
     createRouteFromOsrmRoute(route.toString().toByteArray(Charsets.UTF_8),listOf(
         Waypoint(GeographicCoordinate(from.lat,from.lon),WaypointKind.BREAK,null),
         Waypoint(GeographicCoordinate(to.lat,to.lon),WaypointKind.BREAK,null)),6u)
+
+/** Photon has no Hebrew option; without a language it returns local names, Hebrew across Israel. */
+internal fun photonLanguage(): String = if(AppLanguage.isHebrew) "" else "&lang=en"
 
 class MapRepository(private val photonBase:String="https://photon.komoot.io", private val routingBase:String="https://router.project-osrm.org", private val valhallaBase:String="https://valhalla1.openstreetmap.de",
     private val ferrostarParser:(JSONObject,Coordinate,Coordinate)->Route?=::ferrostarRouteFromOsrm) : NavigationRepository {
@@ -79,9 +82,9 @@ class MapRepository(private val photonBase:String="https://photon.komoot.io", pr
             override fun onResponse(call: Call, response: Response) {
                 try {
                     val result = response.use {
-                        check(it.isSuccessful) { if (it.code == 429) "Service is busy. Try again shortly." else "Map service unavailable (${it.code}). Try again." }
-                        val body = it.body ?: error("Empty response")
-                        require(body.contentLength() <= maxBytes) { "The map response is too large. Try a shorter route." }
+                        check(it.isSuccessful) { if (it.code == 429) tr("Service is busy. Try again shortly.","השירות עמוס. נסו שוב בעוד רגע.") else tr("Map service unavailable (${it.code}). Try again.","שירות המפות אינו זמין (${it.code}). נסו שוב.") }
+                        val body = it.body ?: error(tr("Empty response","התקבלה תשובה ריקה מהשירות"))
+                        require(body.contentLength() <= maxBytes) { tr("The map response is too large. Try a shorter route.","התשובה משירות המפות גדולה מדי. נסו מסלול קצר יותר.") }
                         val output = ByteArrayOutputStream()
                         body.byteStream().use { input ->
                             val buffer = ByteArray(8192)
@@ -89,7 +92,7 @@ class MapRepository(private val photonBase:String="https://photon.komoot.io", pr
                                 if (!continuation.isActive) throw IOException("Request cancelled")
                                 val count = input.read(buffer)
                                 if (count < 0) break
-                                require(output.size() + count <= maxBytes) { "The map response is too large. Try a shorter route." }
+                                require(output.size() + count <= maxBytes) { tr("The map response is too large. Try a shorter route.","התשובה משירות המפות גדולה מדי. נסו מסלול קצר יותר.") }
                                 output.write(buffer, 0, count)
                             }
                         }
@@ -105,33 +108,33 @@ class MapRepository(private val photonBase:String="https://photon.komoot.io", pr
         })
     }
     private fun JSONArray.point(): Coordinate = Coordinate(getDouble(1),getDouble(0)).also {
-        require(it.isValid()) { "The map service returned invalid coordinates. Try again." }
+        require(it.isValid()) { tr("The map service returned invalid coordinates. Try again.","שירות המפות החזיר קואורדינטות שגויות. נסו שוב.") }
     }
     private fun text(value: String, limit: Int = 200) = value.take(limit).map { if (it.isISOControl()) ' ' else it }.joinToString("").trim()
     private fun number(value: Double, maximum: Double): Double = value.also {
-        require(it.isFinite() && it >= 0 && it <= maximum) { "The route contains invalid distances or times. Try again." }
+        require(it.isFinite() && it >= 0 && it <= maximum) { tr("The route contains invalid distances or times. Try again.","המסלול מכיל מרחקים או זמנים שגויים. נסו שוב.") }
     }
     override suspend fun search(query: String, near: Coordinate): List<Place> = withContext(Dispatchers.IO) {
-        require(query.length <= 256) { "Use a shorter place name or address (up to 256 characters)." }
-        require(near.isValid()) { "Waiting for a valid location." }
-        val features = json("${photonBase.trimEnd('/')}/api/?q=${URLEncoder.encode(query,"UTF-8")}&lat=${near.lat}&lon=${near.lon}&limit=8&lang=en&zoom=12&location_bias_scale=0.2").getJSONArray("features")
-        require(features.length() <= 8) { "The search response has too many places. Try again." }
+        require(query.length <= 256) { tr("Use a shorter place name or address (up to 256 characters).","השתמשו בשם מקום או בכתובת קצרים יותר (עד 256 תווים).") }
+        require(near.isValid()) { tr("Waiting for a valid location.","ממתינים למיקום תקין.") }
+        val features = json("${photonBase.trimEnd('/')}/api/?q=${URLEncoder.encode(query,"UTF-8")}&lat=${near.lat}&lon=${near.lon}&limit=8${photonLanguage()}&zoom=12&location_bias_scale=0.2").getJSONArray("features")
+        require(features.length() <= 8) { tr("The search response has too many places. Try again.","תוצאות החיפוש כוללות יותר מדי מקומות. נסו שוב.") }
         (0 until features.length()).map { i ->
             val f = features.getJSONObject(i); val p = f.getJSONObject("properties"); val c = f.getJSONObject("geometry").getJSONArray("coordinates")
-            Place(if(p.has("osm_id"))"${text(p.optString("osm_type"),8)}${p.optLong("osm_id")}" else "photon:${c.getDouble(1)},${c.getDouble(0)}:${text(p.optString("name"))}",text(p.optString("name").ifBlank { p.optString("street","Dropped pin") }),
+            Place(if(p.has("osm_id"))"${text(p.optString("osm_type"),8)}${p.optLong("osm_id")}" else "photon:${c.getDouble(1)},${c.getDouble(0)}:${text(p.optString("name"))}",text(p.optString("name").ifBlank { p.optString("street",tr("Dropped pin","נעץ במפה")) }),
                 listOf(p.optString("housenumber"),p.optString("street"),p.optString("district"),p.optString("city"),p.optString("county"),p.optString("country")).map{ text(it,120) }.filter{it.isNotBlank()}.distinct().joinToString(", "),
                 c.point(),text(p.optString("osm_value","place"),60),"OpenStreetMap · Photon")
         }.distinctBy { it.id }
     }
     override suspend fun reverse(point: Coordinate): String = withContext(Dispatchers.IO) {
-        require(point.isValid()) { "Waiting for a valid location." }
-        val p = json("${photonBase.trimEnd('/')}/reverse?lat=${point.lat}&lon=${point.lon}&limit=1&lang=en").getJSONArray("features").optJSONObject(0)?.optJSONObject("properties")
-        text(p?.optString("city")?.ifBlank { p.optString("county") }?.ifBlank { "Your location" } ?: "Your location")
+        require(point.isValid()) { tr("Waiting for a valid location.","ממתינים למיקום תקין.") }
+        val p = json("${photonBase.trimEnd('/')}/reverse?lat=${point.lat}&lon=${point.lon}&limit=1${photonLanguage()}").getJSONArray("features").optJSONObject(0)?.optJSONObject("properties")
+        text(p?.optString("city")?.ifBlank { p.optString("county") }?.ifBlank { tr("Your location","המיקום שלך") } ?: tr("Your location","המיקום שלך"))
     }
     override suspend fun reversePlace(point: Coordinate): Place? = withContext(Dispatchers.IO) {
-        require(point.isValid()) { "Choose a destination with valid coordinates." }
-        val features=json("${photonBase.trimEnd('/')}/reverse?lat=${point.lat}&lon=${point.lon}&limit=3&lang=en").getJSONArray("features")
-        require(features.length()<=3) { "The place response is too large. Try again." }
+        require(point.isValid()) { tr("Choose a destination with valid coordinates.","בחרו יעד עם קואורדינטות תקינות.") }
+        val features=json("${photonBase.trimEnd('/')}/reverse?lat=${point.lat}&lon=${point.lon}&limit=3${photonLanguage()}").getJSONArray("features")
+        require(features.length()<=3) { tr("The place response is too large. Try again.","התשובה על המקום גדולה מדי. נסו שוב.") }
         (0 until features.length()).mapNotNull { index ->
             val feature=features.optJSONObject(index) ?: return@mapNotNull null
             val properties=feature.optJSONObject("properties") ?: return@mapNotNull null
@@ -150,7 +153,7 @@ class MapRepository(private val photonBase:String="https://photon.komoot.io", pr
         }.firstOrNull()
     }
     override suspend fun route(from: Coordinate, to: Coordinate,mode:TravelMode): RoadRoute = withContext(Dispatchers.IO) {
-        require(from.isValid() && to.isValid()) { "Choose a destination with valid coordinates." }
+        require(from.isValid() && to.isValid()) { tr("Choose a destination with valid coordinates.","בחרו יעד עם קואורדינטות תקינות.") }
         val obj = if(mode==TravelMode.CAR) json("${routingBase.trimEnd('/')}/route/v1/driving/${from.lon},${from.lat};${to.lon},${to.lat}?overview=full&geometries=polyline6&steps=true",8*1024*1024)
         else routeMutex.withLock {
             val elapsed=(System.nanoTime()-lastRouteCall)/1_000_000
@@ -161,16 +164,16 @@ class MapRepository(private val photonBase:String="https://photon.komoot.io", pr
                 .put("units","kilometers").put("language","en-US")
             json("${valhallaBase.trimEnd('/')}/route?json=${URLEncoder.encode(payload.toString(),"UTF-8")}",8*1024*1024)
         }
-        check(obj.optString("code") == "Ok") { "No ${mode.routeDescription} route found. Choose another destination." }
+        check(obj.optString("code") == "Ok") { tr("No ${mode.routeDescription} route found. Choose another destination.","לא נמצא ${mode.hebrewRoute}. בחרו יעד אחר.") }
         val r = obj.getJSONArray("routes").getJSONObject(0)
         val points=decodePolyline6(r.getString("geometry"))
-        require(points.size in 2..50_000) { "This route is too short or too complex. Choose a closer destination." }
+        require(points.size in 2..50_000) { tr("This route is too short or too complex. Choose a closer destination.","המסלול קצר או מורכב מדי. בחרו יעד קרוב יותר.") }
         val legs = r.getJSONArray("legs")
-        require(legs.length() in 1..64) { "This route has too many sections. Choose a closer destination." }
+        require(legs.length() in 1..64) { tr("This route has too many sections. Choose a closer destination.","במסלול יש יותר מדי מקטעים. בחרו יעד קרוב יותר.") }
         val steps = buildList {
             for (i in 0 until legs.length()) {
                 val s = legs.getJSONObject(i).getJSONArray("steps")
-                require(size + s.length() <= 2000 && (size.toLong()+s.length())*points.size <= 10_000_000) { "This route is too complex. Choose a closer destination." }
+                require(size + s.length() <= 2000 && (size.toLong()+s.length())*points.size <= 10_000_000) { tr("This route is too complex. Choose a closer destination.","המסלול מורכב מדי. בחרו יעד קרוב יותר.") }
                 for (j in 0 until s.length()) {
                     val step = s.getJSONObject(j); val m = step.getJSONObject("maneuver"); val c = m.getJSONArray("location")
                     add(Maneuver(c.point(),text(m.getString("type"),40),text(m.optString("modifier"),40),text(step.optString("name").ifBlank { step.optString("ref") }),number(step.getDouble("distance"),40_000_000.0),number(step.getDouble("duration"),31*86400.0),m.optInt("exit").coerceIn(0,99),
@@ -181,7 +184,7 @@ class MapRepository(private val photonBase:String="https://photon.komoot.io", pr
         }
         val meters=number(r.getDouble("distance"),40_000_000.0)
         val seconds=number(r.getDouble("duration"),31*86400.0)
-        check(steps.isNotEmpty() && meters>0) { "That destination is too close. Choose another place." }
+        check(steps.isNotEmpty() && meters>0) { tr("That destination is too close. Choose another place.","היעד קרוב מדי. בחרו מקום אחר.") }
         // The public routing endpoints omit voice and banner prompts. Add them to
         // their OSRM response so Ferrostar owns instruction timing and de-duplication.
         val sourceSteps=buildList<JSONObject> {
@@ -195,7 +198,7 @@ class MapRepository(private val photonBase:String="https://photon.komoot.io", pr
             val segment=steps[index].distance
             if((source.optJSONArray("voiceInstructions")?.length() ?: 0) == 0) {
                 val prompts=JSONArray()
-                if(segment>210)prompts.put(JSONObject().put("announcement","In 180 meters, ${upcoming.instruction}").put("distanceAlongGeometry",180.0))
+                if(segment>210)prompts.put(JSONObject().put("announcement",inMetres(180,upcoming.instruction)).put("distanceAlongGeometry",180.0))
                 if(segment>45)prompts.put(JSONObject().put("announcement",upcoming.instruction).put("distanceAlongGeometry",35.0))
                 if(prompts.length()>0)source.put("voiceInstructions",prompts)
             }
@@ -213,10 +216,10 @@ class MapRepository(private val photonBase:String="https://photon.komoot.io", pr
                 }
             }
         }
-        check(distance(from,points.first()) < 1500 && distance(to,points.last()) < 1500) { "No nearby road access found for this location." }
+        check(distance(from,points.first()) < 1500 && distance(to,points.last()) < 1500) { tr("No nearby road access found for this location.","לא נמצאה גישה לכביש בקרבת המיקום הזה.") }
         val ferrostar=ferrostarParser(r,from,to)
         if(ferrostar!=null)require(ferrostar.geometry.size==points.size && ferrostar.steps.size==steps.size) {
-            "The navigation route could not be matched to the map. Try again."
+            tr("The navigation route could not be matched to the map. Try again.","לא ניתן היה להתאים את המסלול למפה. נסו שוב.")
         }
         RoadRoute(points,steps,meters,seconds,mode,ferrostar)
     }

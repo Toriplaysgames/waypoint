@@ -6,9 +6,12 @@ data class Coordinate(val lat: Double, val lon: Double)
 internal fun shortestLongitudeDelta(from: Double,to: Double): Double = ((to-from+540.0)%360.0)-180.0
 internal fun wrappedLongitude(value: Double): Double = ((value+540.0)%360.0)-180.0
 data class Place(val id: String, val name: String, val address: String, val point: Coordinate, val kind: String = "place", val source: String = "")
+/** Map-picked places store an English marker as their address; show it in the app language. */
+internal val Place.shownAddress: String get() = if (address == "Selected on map") tr(address, "נבחר במפה") else address
 data class Maneuver(val point: Coordinate, val type: String, val modifier: String, val road: String, val distance: Double, val duration: Double, val exit: Int = 0,
     val uTurnRight: Boolean = false) {
-    val instruction: String get() {
+    val instruction: String get() = if (AppLanguage.isHebrew) hebrewInstruction() else englishInstruction()
+    private fun englishInstruction(): String {
         val action = when (type) {
             "depart" -> "Head ${modifier.ifBlank { "straight" }}"
             "arrive" -> "Arrive at your destination"
@@ -28,6 +31,45 @@ data class Maneuver(val point: Coordinate, val type: String, val modifier: Strin
         }
         return if (road.isNotBlank() && type != "arrive") "$action onto $road" else action
     }
+    /** Gender-neutral plural imperatives, as Hebrew navigation apps speak. */
+    private fun hebrewInstruction(): String {
+        val action = when (type) {
+            "depart" -> hebrewTurn(modifier.ifBlank { "straight" })
+            "arrive" -> "הגעה ליעד"
+            "roundabout", "rotary", "roundabout turn" -> if (exit > 0) "בכיכר, צאו ביציאה ${hebrewOrdinal(exit)}" else "היכנסו לכיכר"
+            "exit roundabout", "exit rotary" -> "צאו מהכיכר"
+            "merge" -> when (hebrewSide(modifier)) { "מימין" -> "השתלבו ימינה"; "משמאל" -> "השתלבו שמאלה"; else -> "השתלבו בתנועה" }
+            "on ramp" -> "עלו לרמפה ${hebrewSide(modifier)}".trim()
+            "off ramp" -> "צאו ביציאה ${hebrewSide(modifier)}".trim()
+            "fork" -> when (hebrewSide(modifier)) { "מימין" -> "הישארו מימין"; "משמאל" -> "הישארו משמאל"; else -> "המשיכו ישר" }
+            else -> hebrewTurn(modifier)
+        }
+        return if (road.isNotBlank() && type != "arrive") "$action אל $road" else action
+    }
+}
+
+private fun hebrewTurn(modifier: String): String = when (modifier) {
+    "uturn" -> "בצעו פניית פרסה"
+    "left" -> "פנו שמאלה"
+    "right" -> "פנו ימינה"
+    "slight left" -> "פנו קלות שמאלה"
+    "slight right" -> "פנו קלות ימינה"
+    "sharp left" -> "פנו בחדות שמאלה"
+    "sharp right" -> "פנו בחדות ימינה"
+    else -> "המשיכו ישר"
+}
+
+private fun hebrewSide(modifier: String): String = when {
+    modifier.endsWith("right") -> "מימין"
+    modifier.endsWith("left") -> "משמאל"
+    else -> ""
+}
+
+/** Spoken ordinals read better than digits: "ביציאה השנייה". */
+internal fun hebrewOrdinal(exit: Int): String = when (exit) {
+    1 -> "הראשונה"; 2 -> "השנייה"; 3 -> "השלישית"; 4 -> "הרביעית"; 5 -> "החמישית"
+    6 -> "השישית"; 7 -> "השביעית"; 8 -> "השמינית"; 9 -> "התשיעית"; 10 -> "העשירית"
+    else -> "מספר $exit"
 }
 
 /** Preserve the provider's actual turn direction, including a crossing of north. */
@@ -53,10 +95,10 @@ data class RouteGuidance(val instruction:String,val maneuver:Maneuver?,val conti
 fun routeGuidance(route:RoadRoute?,progress:RouteProgress?):RouteGuidance {
     if(progress?.guidanceText!=null)return RouteGuidance(progress.guidanceText,route?.steps?.getOrNull(progress.nextStep),false)
     val step=route?.steps?.getOrNull(progress?.nextStep ?: 0)
-        ?: return RouteGuidance("Finding your route",null,false)
+        ?: return RouteGuidance(tr("Finding your route","מחשבים מסלול"),null,false)
     if(step.type=="arrive" && progress!=null && progress.toTurn>150.0) {
         val lastRoad=route.steps.getOrNull((progress.nextStep-1).coerceAtLeast(0))?.road.orEmpty()
-        return RouteGuidance(if(lastRoad.isNotBlank())"Continue on $lastRoad" else "Continue toward your destination",step,true)
+        return RouteGuidance(if(lastRoad.isNotBlank())tr("Continue on $lastRoad","המשיכו לאורך $lastRoad") else tr("Continue toward your destination","המשיכו לכיוון היעד"),step,true)
     }
     return RouteGuidance(step.instruction,step,false)
 }
@@ -123,5 +165,9 @@ class NavigationEngine(val route: RoadRoute) {
 }
 
 fun formatDistance(meters: Double, imperial: Boolean = false): String = if (imperial) {
-    if(meters < 160.934) "${(meters*3.28084/10).roundToInt()*10} ft" else String.format(java.util.Locale.US,"%.1f mi",meters/1609.344)
-} else if(meters < 1000) "${(meters/10).roundToInt()*10} m" else String.format(java.util.Locale.US,"%.1f km",meters/1000)
+    if(meters < 160.934) "${(meters*3.28084/10).roundToInt()*10} ${tr("ft","רגל")}" else "${String.format(java.util.Locale.US,"%.1f",meters/1609.344)} ${tr("mi","מייל")}"
+} else if(meters < 1000) "${(meters/10).roundToInt()*10} ${tr("m","מ׳")}" else "${String.format(java.util.Locale.US,"%.1f",meters/1000)} ${tr("km","ק״מ")}"
+
+/** Spoken lead-in for a prompt this many metres before the turn. */
+internal fun inMetres(metres: Int, instruction: String): String =
+    tr("In $metres meters, $instruction", "בעוד $metres מטר, $instruction")

@@ -148,7 +148,7 @@ private class HorsePhoneView(context: Context) : View(context) {
         ink.strokeWidth = 5f
         ink.style = Paint.Style.STROKE
         canvas.drawPath(arrow, ink)
-        canvas.drawText("Continue straight", 218f, 886f, lettering)
+        canvas.drawText(tr("Continue straight","המשיכו ישר"), 218f, 886f, lettering)
         ink.style = Paint.Style.FILL
         canvas.save()
         canvas.translate(520f, 1053f)

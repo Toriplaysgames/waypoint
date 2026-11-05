@@ -87,7 +87,7 @@ internal class WaypointCarPlacesScreen(context: CarContext, private val saved: B
                     if(acceptsCarInput())screenManager.push(WaypointCarPlacesScreen(carContext,saved,group.map { it.id }.toSet()))
                 }.build())
             else list.addItem(Row.Builder().setTitle(place.name)
-                .addText(place.address.ifBlank { carContext.getString(R.string.car_destination) })
+                .addText(place.shownAddress.ifBlank { carContext.getString(R.string.car_destination) })
                 .setOnClickListener {
                     val current=controller.state.value
                     if(!acceptsCarInput() || current.navigating || (current.saved+current.recent).none { it==place })return@setOnClickListener
@@ -126,13 +126,13 @@ internal class WaypointCarSearchScreen(context: CarContext) : Screen(context) {
                 controller.submitSearch()
             }
         }).setHeaderAction(Action.BACK)
-            .setSearchHint("Search places")
+            .setSearchHint(tr("Search places","חיפוש מקומות"))
             .setShowKeyboardByDefault(true)
         if (state.searching) return builder.setLoading(true).build()
         val list = ItemList.Builder()
         state.searchResults.take(carContext.listLimit()).forEach { place ->
             list.addItem(Row.Builder().setTitle(place.name)
-                .addText(place.address.ifBlank { "Place" })
+                .addText(place.shownAddress.ifBlank { tr("Place", "מקום") })
                 .setOnClickListener {
                     val current=controller.state.value
                     if(!acceptsCarInput() || current.navigating || current.query!=state.query ||
@@ -155,16 +155,16 @@ internal class WaypointCarSettingsScreen(context: CarContext) : Screen(context) 
     override fun onGetTemplate(): Template {
         val state = controller.state.value
         val list = ItemList.Builder()
-            .addItem(Row.Builder().setTitle("Map world")
-                .addText("${state.world.title} · shared with your phone")
+            .addItem(Row.Builder().setTitle(tr("Map world","עולם המפה"))
+                .addText(tr("${state.world.title} · shared with your phone","${state.world.title} · משותף עם הטלפון"))
                 .setOnClickListener { if(acceptsCarInput())screenManager.push(WaypointCarWorldScreen(carContext)) }
                 .build())
-            .addItem(Row.Builder().setTitle("Voice guidance")
-                .addText(if (state.voice) "On" else "Muted")
+            .addItem(Row.Builder().setTitle(tr("Voice guidance","הנחיות קוליות"))
+                .addText(if (state.voice) tr("On","פועל") else tr("Muted","מושתק"))
                 .setToggle(Toggle.Builder { checked -> if(acceptsCarInput() && checked != controller.state.value.voice)controller.toggleVoice() }.setChecked(state.voice).build())
                 .build())
             .addItem(Row.Builder().setTitle(carContext.getString(R.string.car_imperial))
-                .addText(if (state.imperial) "Miles and feet" else carContext.getString(R.string.metric_units))
+                .addText(if (state.imperial) tr("Miles and feet","מיילים ורגל") else carContext.getString(R.string.metric_units))
                 .setToggle(Toggle.Builder { checked -> if(acceptsCarInput() && checked != controller.state.value.imperial)controller.toggleUnits() }.setChecked(state.imperial).build())
                 .build())
             .addItem(Row.Builder().setTitle(carContext.getString(R.string.map_data_licenses))
@@ -172,14 +172,14 @@ internal class WaypointCarSettingsScreen(context: CarContext) : Screen(context) 
                 .setOnClickListener { if(acceptsCarInput())screenManager.push(WaypointCarCreditsScreen(carContext)) }
                 .build())
             .build()
-        return ListTemplate.Builder().setHeader(carHeader("Map settings"))
+        return ListTemplate.Builder().setHeader(carHeader(tr("Map settings","הגדרות המפה")))
             .setSingleList(list).build()
     }
 }
 
 internal class WaypointCarCreditsScreen(context: CarContext) : Screen(context) {
     override fun onGetTemplate(): Template = MessageTemplate.Builder(
-        "Map data: OpenStreetMap contributors (ODbL). Tiles: OpenFreeMap. " +
+        tr("Map data: OpenStreetMap contributors (ODbL). Tiles: OpenFreeMap. ","נתוני מפה: התורמים ל-OpenStreetMap (ODbL). אריחים: OpenFreeMap. ") +
             carContext.getString(R.string.map_credits)
     ).setHeader(carHeader(carContext.getString(R.string.map_data_licenses))).build()
 }

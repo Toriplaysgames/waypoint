@@ -143,7 +143,7 @@ fun WelcomeScreen(
             TextButton(
                 onClick = { complete() },
                 modifier = Modifier.heightIn(min = 48.dp),
-            ) { Text("Skip setup", color = Muted) }
+            ) { Text(tr("Skip setup","דילוג על ההגדרה"), color = Muted) }
         }
         LinearProgressIndicator(
             progress = { (step + 1) / 6f },
@@ -157,7 +157,7 @@ fun WelcomeScreen(
             transitionSpec = {
                 (fadeIn(tween(280)) + slideInHorizontally(tween(280)) { it / 16 }) togetherWith fadeOut(tween(160))
             },
-            label = "First run steps",
+            label = tr("First run steps","שלבי ההפעלה הראשונה"),
         ) { visibleStep ->
             when (visibleStep) {
                 0, 1, 2 -> StoryStep(
@@ -195,12 +195,12 @@ fun WelcomeScreen(
 @Composable
 private fun StoryStep(step: Int, world: World, onNext: () -> Unit, onBack: () -> Unit) {
     val story = when (step) {
-        0 -> "The worlds you love,\nright on the road." to
+        0 -> tr("The worlds you love,\nright on the road.","העולמות שאהבת,\nישר על הכביש.") to
             stringResource(R.string.welcome_worlds_description)
-        1 -> "Find the style\nthat feels like yours." to
-            "Every world brings its own cartography, typography and navigation display."
-        else -> "Go your own way." to
-            "Choose a car, motorcycle or walking route, then follow spoken turn-by-turn guidance."
+        1 -> tr("Find the style\nthat feels like yours.","מצאו את הסגנון\nשמרגיש כמו שלך.") to
+            tr("Every world brings its own cartography, typography and navigation display.","לכל עולם יש קרטוגרפיה, טיפוגרפיה ותצוגת ניווט משלו.")
+        else -> tr("Go your own way.","בדרך שלך.") to
+            tr("Choose a car, motorcycle or walking route, then follow spoken turn-by-turn guidance.","בחרו מסלול ברכב, באופנוע או ברגל, ועקבו אחרי ההנחיות הקוליות לכל פנייה.")
     }
     Column(Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Box(
@@ -225,7 +225,7 @@ private fun StoryStep(step: Int, world: World, onNext: () -> Unit, onBack: () ->
         ) {
             if (step > 0) {
                 TextButton(onClick = onBack, modifier = Modifier.heightIn(min = 52.dp)) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(18.dp)); Spacer(Modifier.width(5.dp)); Text("Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(18.dp)); Spacer(Modifier.width(5.dp)); Text(tr("Back","חזרה"))
                 }
             }
             Button(
@@ -235,7 +235,7 @@ private fun StoryStep(step: Int, world: World, onNext: () -> Unit, onBack: () ->
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp, pressedElevation = 3.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF147BFF), contentColor = Color.White),
             ) {
-                Text(if (step == 2) "Choose your worlds" else "Continue", fontWeight = FontWeight.SemiBold)
+                Text(if (step == 2) tr("Choose your worlds","בחירת העולמות שלך") else tr("Continue","המשך"), fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.width(8.dp)); Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(19.dp))
             }
         }
@@ -246,9 +246,9 @@ private fun StoryStep(step: Int, world: World, onNext: () -> Unit, onBack: () ->
 private fun TravelModePreview(world: World) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf(
-            "Car" to Icons.Default.DirectionsCar,
-            "Motorcycle" to Icons.Default.TwoWheeler,
-            "Walk" to Icons.AutoMirrored.Filled.DirectionsWalk,
+            tr("Car","רכב") to Icons.Default.DirectionsCar,
+            tr("Motorcycle","אופנוע") to Icons.Default.TwoWheeler,
+            tr("Walk","הליכה") to Icons.AutoMirrored.Filled.DirectionsWalk,
         ).forEach { (label, icon) ->
             Surface(
                 color = Panel,
@@ -269,9 +269,9 @@ private fun TravelModePreview(world: World) {
 @Composable
 private fun FavoriteWorldPicker(selectedNames: Set<String>, onToggle: (World) -> Unit, onContinue: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Which worlds are yours?", fontFamily = DisplayFont, fontSize = 34.sp, lineHeight = 37.sp, color = Cream)
+        Text(tr("Which worlds are yours?","אילו עולמות שלך?"), fontFamily = DisplayFont, fontSize = 34.sp, lineHeight = 37.sp, color = Cream)
         Text(stringResource(R.string.favorites_hint), color = Muted, fontSize = 14.sp, lineHeight = 20.sp)
-        Text("${selectedNames.size} selected", color = Cream, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+        Text(tr("${selectedNames.size} selected","${selectedNames.size} נבחרו"), color = Cream, fontSize = 13.sp, fontWeight = FontWeight.Medium)
         LazyVerticalGrid(
             columns = GridCells.Adaptive(150.dp),
             modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -290,7 +290,7 @@ private fun FavoriteWorldPicker(selectedNames: Set<String>, onToggle: (World) ->
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp, pressedElevation = 3.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF147BFF), contentColor = Color.White),
         ) {
-            Text("Choose a map", fontWeight = FontWeight.SemiBold)
+            Text(tr("Choose a map","בחירת מפה"), fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.width(8.dp)); Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(19.dp))
         }
     }
@@ -301,14 +301,14 @@ private fun FavoriteWorldTile(world: World, selected: Boolean, onClick: () -> Un
     val accent = world.accent
     Box(
         Modifier.fillMaxWidth().height(154.dp).clip(RoundedCornerShape(17.dp))
-            .semantics(mergeDescendants = true) { contentDescription = "${world.title}, ${if (selected) "selected" else "not selected"}" }
+            .semantics(mergeDescendants = true) { contentDescription = "${world.title}, ${if (selected) tr("selected", "נבחר") else tr("not selected", "לא נבחר")}" }
             .clickable(role = Role.Checkbox, onClick = onClick),
     ) {
         Image(painterResource(artworkFor(world)), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.05f), 0.38f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.86f))))
         if (selected) {
             Box(Modifier.align(Alignment.TopEnd).padding(10.dp).size(28.dp).clip(CircleShape).background(accent), contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.Check, "Selected", Modifier.size(17.dp), tint = Ink)
+                Icon(Icons.Default.Check, tr("Selected","נבחר"), Modifier.size(17.dp), tint = Ink)
             }
         }
         Column(Modifier.align(Alignment.BottomStart).padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -334,21 +334,22 @@ private fun WorldCarouselStep(
     onUseWorld: () -> Unit,
 ) {
     var mapError by remember { mutableStateOf<String?>(null) }
+    val rtl = isRtl()
     Column(Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Select map to", fontFamily = DisplayFont, fontSize = 27.sp, lineHeight = 30.sp, color = Cream,
+            Text(tr("Select map to","בחרו מפה"), fontFamily = DisplayFont, fontSize = 27.sp, lineHeight = 30.sp, color = Cream,
                 modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-            Text("start", fontFamily = DisplayFont, fontSize = 40.sp, lineHeight = 43.sp, color = Cream,
+            Text(tr("start","כדי להתחיל"), fontFamily = DisplayFont, fontSize = 40.sp, lineHeight = 43.sp, color = Cream,
                 modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         }
         Box(
             Modifier.weight(1f).fillMaxWidth().clip(RoundedCornerShape(16.dp))
-                .semantics { contentDescription = "${world.title} themed map preview" }
-                .pointerInput(world, worlds.size) {
+                .semantics { contentDescription = tr("${world.title} themed map preview","תצוגה מקדימה של מפה בסגנון ${world.title}") }
+                .pointerInput(world, worlds.size, rtl) {
                     var drag = 0f
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { change, amount -> drag += amount; change.consume() },
-                        onDragEnd = { if (abs(drag) > 54f) onMove(if (drag < 0f) 1 else -1); drag = 0f },
+                        onDragEnd = { if (abs(drag) > 54f) onMove(swipeStep(drag, rtl)); drag = 0f },
                         onDragCancel = { drag = 0f },
                     )
                 },
@@ -367,14 +368,14 @@ private fun WorldCarouselStep(
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(Icons.Default.LocationOn, null, Modifier.size(19.dp), tint = world.accent)
                     Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                        Text("KOLKATA", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Cream, letterSpacing = 1.sp)
-                        Text("${world.title} · map preview", fontSize = 10.sp, color = Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(tr("KOLKATA","קולקטה"), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Cream, letterSpacing = 1.sp)
+                        Text(tr("${world.title} · map preview","${world.title} · תצוגה מקדימה של המפה"), fontSize = 10.sp, color = Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
             if (mapError != null) {
                 Surface(color = Color(0xE5101518), shape = RoundedCornerShape(10.dp), modifier = Modifier.align(Alignment.Center).padding(18.dp)) {
-                    Text("Map preview needs an internet connection", Modifier.padding(14.dp), color = Cream, fontSize = 13.sp)
+                    Text(tr("Map preview needs an internet connection","לתצוגה המקדימה של המפה נדרש חיבור לאינטרנט"), Modifier.padding(14.dp), color = Cream, fontSize = 13.sp)
                 }
             }
             Row(
@@ -383,14 +384,14 @@ private fun WorldCarouselStep(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 IconButton(onClick = { onMove(-1) }, modifier = Modifier.size(48.dp).background(Color(0xCC111923), CircleShape)) {
-                    Icon(Icons.Default.ChevronLeft, "Previous world", tint = Cream)
+                    Icon(Icons.Default.ChevronLeft, tr("Previous world","העולם הקודם"), Modifier.mirroredInRtl(rtl), tint = Cream)
                 }
                 Column(Modifier.weight(1f).padding(horizontal = 10.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(world.title, fontFamily = worldFont(world), fontSize = 24.sp, lineHeight = 28.sp, color = Cream, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(world.inspiration(), color = world.accent, fontSize = 11.sp, lineHeight = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 IconButton(onClick = { onMove(1) }, modifier = Modifier.size(48.dp).background(Color(0xCC111923), CircleShape)) {
-                    Icon(Icons.Default.ChevronRight, "Next world", tint = Cream)
+                    Icon(Icons.Default.ChevronRight, tr("Next world","העולם הבא"), Modifier.mirroredInRtl(rtl), tint = Cream)
                 }
             }
         }
@@ -400,7 +401,7 @@ private fun WorldCarouselStep(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(
-                Modifier.semantics { contentDescription = "World ${index + 1} of ${worlds.size}" },
+                Modifier.semantics { contentDescription = tr("World ${index + 1} of ${worlds.size}","עולם ${index + 1} מתוך ${worlds.size}") },
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 worlds.forEachIndexed { dotIndex, _ ->
@@ -419,7 +420,7 @@ private fun WorldCarouselStep(
             shape = CircleShape,
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp, pressedElevation = 3.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF147BFF), contentColor = Color.White),
-        ) { Text("Continue", fontWeight = FontWeight.SemiBold); Spacer(Modifier.width(8.dp)); Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(19.dp)) }
+        ) { Text(tr("Continue","המשך"), fontWeight = FontWeight.SemiBold); Spacer(Modifier.width(8.dp)); Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(19.dp)) }
     }
 }
 
@@ -440,24 +441,24 @@ private fun LocationStep(
             Icon(Icons.Default.LocationOn, null, Modifier.align(Alignment.Center).size(72.dp), tint = world.accent)
         }
         Column(Modifier.padding(horizontal = 4.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
-            Text("Your location, when you need it.", fontFamily = DisplayFont, fontSize = 34.sp, lineHeight = 37.sp, color = Cream)
-            Text("Location shows where you are and lets Waypoint build a route from your current position. You can still explore the maps without it.", color = Muted, fontSize = 14.sp, lineHeight = 20.sp)
+            Text(tr("Your location, when you need it.","המיקום שלך, כשצריך אותו."), fontFamily = DisplayFont, fontSize = 34.sp, lineHeight = 37.sp, color = Cream)
+            Text(tr("Location shows where you are and lets Waypoint build a route from your current position. You can still explore the maps without it.","המיקום מראה היכן נמצאים ומאפשר ל-Waypoint לבנות מסלול מהנקודה הנוכחית. אפשר לגלות את המפות גם בלעדיו."), color = Muted, fontSize = 14.sp, lineHeight = 20.sp)
             if (permissionDenied && !hasPermission) {
-                Text("Location is still off. You can enable it in Android settings, or continue without it.", color = world.accent, fontSize = 13.sp, lineHeight = 18.sp)
+                Text(tr("Location is still off. You can enable it in Android settings, or continue without it.","המיקום עדיין כבוי. אפשר להפעיל אותו בהגדרות Android או להמשיך בלעדיו."), color = world.accent, fontSize = 13.sp, lineHeight = 18.sp)
             }
         }
         if (hasPermission) {
             Button(onClick = onContinue, modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp), shape = CircleShape, elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp, pressedElevation = 3.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF147BFF), contentColor = Color.White)) {
-                Text("Open your map", fontWeight = FontWeight.SemiBold); Spacer(Modifier.width(8.dp)); Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(19.dp))
+                Text(tr("Open your map","פתיחת המפה שלך"), fontWeight = FontWeight.SemiBold); Spacer(Modifier.width(8.dp)); Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(19.dp))
             }
         } else {
             Button(onClick = onAllow, modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp), shape = CircleShape, elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp, pressedElevation = 3.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF147BFF), contentColor = Color.White)) {
-                Text("Allow location", fontWeight = FontWeight.SemiBold); Spacer(Modifier.width(8.dp)); Icon(Icons.Default.LocationOn, null, Modifier.size(19.dp))
+                Text(tr("Allow location","אישור מיקום"), fontWeight = FontWeight.SemiBold); Spacer(Modifier.width(8.dp)); Icon(Icons.Default.LocationOn, null, Modifier.size(19.dp))
             }
             if (permissionDenied) {
-                TextButton(onClick = onOpenSettings, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Open Android settings", color = Cream) }
+                TextButton(onClick = onOpenSettings, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text(tr("Open Android settings","פתיחת הגדרות Android"), color = Cream) }
             }
-            TextButton(onClick = onContinue, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Continue without location", color = Muted) }
+            TextButton(onClick = onContinue, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text(tr("Continue without location","המשך בלי מיקום"), color = Muted) }
         }
         Spacer(Modifier.height(2.dp))
     }

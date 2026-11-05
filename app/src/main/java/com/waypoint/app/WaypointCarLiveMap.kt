@@ -134,7 +134,7 @@ internal class WaypointCarLiveMap(context: Context, private val overlay: Waypoin
         frames.removeFrameCallback(frameCallback);framePosted=false
         scope.launch {
             val (json,images)=withContext(Dispatchers.Default) {
-                val source=context.assets.open("styles/${world.file}.json").bufferedReader().use { it.readText() }
+                val source=MapLabels.localize(context.assets.open("styles/${world.file}.json").bufferedReader().use { it.readText() })
                 val bitmaps=hashMapOf(
                     "nav-arrow" to mapPlayer(world),
                     "vehicle-car" to mapVehicle(world,TravelMode.CAR),

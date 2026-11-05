@@ -31,8 +31,8 @@ class UpdateAlerts(private val context:Context) {
     fun scheduled():Boolean=scheduler.getPendingJob(JOB_ID)!=null
 
     fun schedule() {
-        notifications.createNotificationChannel(NotificationChannel(CHANNEL,"App updates",NotificationManager.IMPORTANCE_LOW).apply {
-            description="New Waypoint releases. Downloads and installation are always your choice."
+        notifications.createNotificationChannel(NotificationChannel(CHANNEL,tr("App updates","עדכוני אפליקציה"),NotificationManager.IMPORTANCE_LOW).apply {
+            description=tr("New Waypoint releases. Downloads and installation are always your choice.","גרסאות חדשות של Waypoint. ההורדה וההתקנה תמיד בהחלטתך.")
         })
         if(!scheduled())runCatching {
             scheduler.schedule(JobInfo.Builder(JOB_ID,ComponentName(context,UpdateCheckJob::class.java))
@@ -54,8 +54,8 @@ class UpdateAlerts(private val context:Context) {
         return try {
             notifications.notify(NOTIFICATION_ID,NotificationCompat.Builder(context,CHANNEL)
                 .setSmallIcon(R.drawable.ic_navigation)
-                .setContentTitle("Waypoint ${release.version} is available")
-                .setContentText("See what's new and choose when to update.")
+                .setContentTitle(tr("Waypoint ${release.version} is available","Waypoint ${release.version} זמין"))
+                .setContentText(tr("See what's new and choose when to update.","ראו מה חדש ובחרו מתי לעדכן."))
                 .setCategory(NotificationCompat.CATEGORY_STATUS).setContentIntent(open)
                 .setAutoCancel(true).setOnlyAlertOnce(true).build())
             preferences.edit().putInt("lastNotifiedVersion",release.versionCode).apply()

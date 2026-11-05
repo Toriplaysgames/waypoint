@@ -43,13 +43,13 @@ class HeadingArbiter {
     }
     fun current(now:Long):HeadingReading {
         if(courseActive && course!=null && now-courseAt in 0..2500) {
-            last=course!!;return HeadingReading(last,true,HeadingSource.COURSE,"GPS course · direction of travel")
+            last=course!!;return HeadingReading(last,true,HeadingSource.COURSE,tr("GPS course · direction of travel","כיוון GPS · כיוון התנועה"))
         }
         val c=compass
         if(c!=null && now-compassAt in 0..2000 && c.reliable) {
             last=c.degrees;return c
         }
-        return HeadingReading(last,false,HeadingSource.NONE,if(c!=null && now-compassAt in 0..2000)c.status else "Heading unavailable · waiting for sensors")
+        return HeadingReading(last,false,HeadingSource.NONE,if(c!=null && now-compassAt in 0..2000)c.status else tr("Heading unavailable · waiting for sensors","הכיוון אינו זמין · ממתינים לחיישנים"))
     }
     fun reset(){compass=null;course=null;compassAt=Long.MIN_VALUE;courseAt=Long.MIN_VALUE;courseActive=false}
 }

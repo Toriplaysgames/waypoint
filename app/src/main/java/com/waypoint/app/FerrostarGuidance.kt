@@ -88,10 +88,10 @@ internal class FerrostarGuidance(
                 repository.route(Coordinate(origin.lat,origin.lng),destination,requestedMode)
             } catch(error: CancellationException) { throw error }
             catch(error: Exception) {
-                scope.launch { if(isCurrent(ticket))onAlternateError(error.message ?: "Couldn't update the route. Check your connection.") }
+                scope.launch { if(isCurrent(ticket))onAlternateError(error.message ?: tr("Couldn't update the route. Check your connection.","לא הצלחנו לעדכן את המסלול. בדקו את החיבור לאינטרנט.")) }
                 throw error
             }
-            val parsed=requireNotNull(replacement.ferrostarRoute) { "Ferrostar could not read the new route." }
+            val parsed=requireNotNull(replacement.ferrostarRoute) { tr("Ferrostar could not read the new route.","Ferrostar לא הצליח לקרוא את המסלול החדש.") }
             sessions.read { session ->
                 if(ticket!=session || activeDestination?.let { distance(it,destination)<=5.0 }!=true)
                     throw CancellationException("Navigation session changed")
@@ -125,7 +125,7 @@ internal class FerrostarGuidance(
                         if(isCurrent(replacement.session))onAlternateRoute(replacement.route,replacement.destination)
                     } catch(error: CancellationException) { throw error }
                     catch(error: Exception) {
-                        if(isCurrent(replacement.session))onAlternateError(error.message ?: "Couldn't update the route. Check your connection.")
+                        if(isCurrent(replacement.session))onAlternateError(error.message ?: tr("Couldn't update the route. Check your connection.","לא הצלחנו לעדכן את המסלול. בדקו את החיבור לאינטרנט."))
                     }
                 }
             }
@@ -139,7 +139,7 @@ internal class FerrostarGuidance(
             voice.stopAndClearQueue()
             voice.setMuted(!voiceEnabled)
             if(autoDriveEnabled) navigationLocationProvider.enableSimulationOn(requireNotNull(route.ferrostarRoute))
-            core.startNavigation(requireNotNull(route.ferrostarRoute) { "Ferrostar could not read this route." },ferrostarConfig(route.mode))
+            core.startNavigation(requireNotNull(route.ferrostarRoute) { tr("Ferrostar could not read this route.","Ferrostar לא הצליח לקרוא את המסלול הזה.") },ferrostarConfig(route.mode))
         }
     }
     fun enableAutoDrive(route: RoadRoute?) {

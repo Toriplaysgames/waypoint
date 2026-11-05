@@ -31,7 +31,7 @@ class QuestController(private val context: Context) {
         scope.launch {
             combine(repository.dao.observeQuests(), repository.dao.observeRewards(), repository.dao.observeFocus(), repository.dao.observeProfile()) { quests, rewards, focus, profile ->
                 QuestSnapshot(quests, rewards, focus, profile ?: QuestProfile(), loading = false)
-            }.catch { _state.update { it.copy(loading = false, error = "Your quests could not be opened. Close and reopen Waypoint to try again.") } }
+            }.catch { _state.update { it.copy(loading = false, error = tr("Your quests could not be opened. Close and reopen Waypoint to try again.","לא הצלחנו לפתוח את המשימות. סגרו ופתחו את Waypoint מחדש ונסו שוב.")) } }
                 .collect { snapshot ->
                     _state.value = snapshot.copy(error = _state.value.error)
                     reminders.sync(snapshot.quests, snapshot.focus)
@@ -46,9 +46,9 @@ class QuestController(private val context: Context) {
             _busy.value = true
             try { block() }
             catch (cancelled: CancellationException) { throw cancelled }
-            catch (error: IllegalArgumentException) { _state.update { it.copy(error = error.message ?: "Check the quest details and try again.") } }
-            catch (error: IllegalStateException) { _state.update { it.copy(error = error.message ?: "This quest changed. Open it again to continue.") } }
-            catch (_: Exception) { _state.update { it.copy(error = "That change could not be saved. Check available storage and try again.") } }
+            catch (error: IllegalArgumentException) { _state.update { it.copy(error = error.message ?: tr("Check the quest details and try again.","בדקו את פרטי המשימה ונסו שוב.")) } }
+            catch (error: IllegalStateException) { _state.update { it.copy(error = error.message ?: tr("This quest changed. Open it again to continue.","המשימה השתנתה. פתחו אותה שוב כדי להמשיך.")) } }
+            catch (_: Exception) { _state.update { it.copy(error = tr("That change could not be saved. Check available storage and try again.","לא הצלחנו לשמור את השינוי. בדקו שיש מקום פנוי באחסון ונסו שוב.")) } }
             finally { _busy.value = false }
         }
     } }

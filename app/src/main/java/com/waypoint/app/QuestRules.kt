@@ -51,3 +51,47 @@ internal fun questReward(focusFinished: Boolean, durationMs: Long): Int =
 
 internal fun validQuestTitle(value: String): String? = value.trim()
     .takeIf { it.isNotBlank() && it.length <= 160 && it.none(Char::isISOControl) }
+
+/** Badge, frame and template names are stored identifiers; translate them only for display. */
+internal fun questBadgeLabel(badge: String): String = tr(badge, when (badge) {
+    "First step" -> "צעד ראשון"
+    "Finding your rhythm" -> "מוצאים את הקצב"
+    "Seasoned adventurer" -> "חמישים הרפתקאות"
+    "Time well spent" -> "זמן מנוצל היטב"
+    else -> badge
+})
+
+internal fun questFrameLabel(frame: String): String = tr(frame, when (frame) {
+    "Simple" -> "פשוטה"
+    "Scout" -> "גשש"
+    "Explorer" -> "מגלה ארצות"
+    "Wayfinder" -> "מורה דרך"
+    else -> frame
+})
+
+internal fun questTemplateLabel(template: String): String = tr(template, when (template) {
+    "Everyday task" -> "משימה יומיומית"
+    "Visit a place" -> "ביקור במקום"
+    "Focus session" -> "זמן ריכוז"
+    else -> template
+})
+
+internal fun questPortraitLabel(portrait: String): String = tr(portrait.replaceFirstChar { it.titlecase() }, when (portrait) {
+    "guide" -> "מדריך"
+    "companion" -> "חבר למסע"
+    else -> "גשש"
+})
+
+internal val JourneyChapter.localTitle: String get() = tr(title, when (quests) {
+    5 -> "מקום להתחיל בו"
+    20 -> "סוללים דרך משלך"
+    50 -> "הדרך שלפנים"
+    else -> title
+})
+
+internal val JourneyChapter.localText: String get() = tr(text, when (quests) {
+    5 -> "חמש הבטחות קטנות, שקוימו. המפה לא השתנתה, אבל המקום שלך בה כן. כל מסע מתחיל במשהו רגיל שמחליטים לעשות."
+    20 -> "השבילים המוכרים מספרים עכשיו סיפור אחר: הדברים שסיימת, הזמן שפינית, האנשים והמקומות שבחרת. המסלול שנוצר הוא מסלול משלך."
+    50 -> "חמישים משימות מאחוריך, ואין יעד סופי לרדוף אחריו. קחו רגע להביט לאחור. הפרק הבא יכול להיות קטן כמו אחר צהריים שקט, או רחב כמו אופק חדש."
+    else -> text
+})

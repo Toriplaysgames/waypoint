@@ -240,8 +240,8 @@ internal class WaypointCarScreen(context: CarContext): Screen(context), SurfaceC
         .setTitle(title).setStartHeaderAction(Action.APP_ICON).build()
     private fun carCue(s: NavState): String = when {
         !s.gpsReady -> s.gpsStatus
-        s.offRoute && s.routeError!=null -> "Route unavailable · keep moving"
-        s.offRoute -> "Off route · finding a new route"
+        s.offRoute && s.routeError!=null -> tr("Route unavailable · keep moving","המסלול אינו זמין · המשיכו לנוע")
+        s.offRoute -> tr("Off route · finding a new route","מחוץ למסלול · מחפשים מסלול חדש")
         else -> routeGuidance(s.route,s.progress).instruction
     }
     private fun carStep(maneuver: Maneuver?,cue: String): Step = Step.Builder(cue)
@@ -260,7 +260,7 @@ internal class WaypointCarScreen(context: CarContext): Screen(context), SurfaceC
         val toTurnSeconds=if(progress.remaining>0) (progress.seconds*progress.toTurn/progress.remaining)
             .coerceAtLeast(0.0).toLong() else 0L
         val trip=Trip.Builder()
-            .addDestination(Destination.Builder().setName(s.selected?.name ?: "Destination").build(),
+            .addDestination(Destination.Builder().setName(s.selected?.name ?: tr("Destination","יעד")).build(),
                 carEstimate(progress.remaining,remaining))
             .addStep(carStep(maneuver,carCue(s)),carEstimate(progress.toTurn,toTurnSeconds))
             .apply { maneuver?.road?.takeIf { it.isNotBlank() }?.let(::setCurrentRoad) }.build()
@@ -287,14 +287,14 @@ internal class WaypointCarScreen(context: CarContext): Screen(context), SurfaceC
             .build()
         if(s.pendingSharedDestination!=null) {
             val id=s.pendingSharedDestinationId
-            return MessageTemplate.Builder("Open ${s.pendingSharedDestination} as your destination?")
-                .setHeader(header("New destination"))
-                .addAction(Action.Builder().setTitle("Open").setOnClickListener{if(screenActive())controller.acceptPendingNavigationImport(id)}.build())
-                .addAction(Action.Builder().setTitle("Dismiss").setOnClickListener{if(screenActive())controller.dismissPendingNavigationImport(id)}.build())
+            return MessageTemplate.Builder(tr("Open ${s.pendingSharedDestination} as your destination?","לפתוח את ${s.pendingSharedDestination} כיעד?"))
+                .setHeader(header(tr("New destination","יעד חדש")))
+                .addAction(Action.Builder().setTitle(tr("Open","פתיחה")).setOnClickListener{if(screenActive())controller.acceptPendingNavigationImport(id)}.build())
+                .addAction(Action.Builder().setTitle(tr("Dismiss","סגירה")).setOnClickListener{if(screenActive())controller.dismissPendingNavigationImport(id)}.build())
                 .build()
         }
-        if(s.resolvingSharedDestination) return MessageTemplate.Builder("Finding the place name…")
-            .setHeader(header("Destination")).setLoading(true).build()
+        if(s.resolvingSharedDestination) return MessageTemplate.Builder(tr("Finding the place name…","מחפשים את שם המקום…"))
+            .setHeader(header(tr("Destination","יעד"))).setLoading(true).build()
         if(s.navigating) {
             val tripId=controller.navigationSessionId
             val maneuver=s.route?.steps?.getOrNull(s.progress?.nextStep ?: 0)
@@ -312,12 +312,12 @@ internal class WaypointCarScreen(context: CarContext): Screen(context), SurfaceC
                 .setMapActionStrip(mapActionStrip())
                 .setPanModeListener { }
                 .setActionStrip(ActionStrip.Builder()
-                    .addAction(Action.Builder().setTitle("End").setOnClickListener {
+                    .addAction(Action.Builder().setTitle(tr("End","סיום")).setOnClickListener {
                         if(screenActive() && controller.acceptsNavigationSession(tripId))controller.stopNavigation()
                     }.build())
-                    .addAction(Action.Builder().setTitle(if(s.voice)"Mute" else "Voice")
+                    .addAction(Action.Builder().setTitle(if(s.voice)tr("Mute","השתקה") else tr("Voice","קול"))
                         .setOnClickListener { if(screenActive() && controller.acceptsNavigationSession(tripId))controller.toggleVoice() }.build())
-                    .addAction(Action.Builder().setTitle("Settings")
+                    .addAction(Action.Builder().setTitle(tr("Settings","הגדרות"))
                         .setOnClickListener { if(screenActive() && controller.acceptsNavigationSession(tripId))screenManager.push(WaypointCarSettingsScreen(carContext)) }.build())
                     .build()).build()
         }
@@ -330,16 +330,16 @@ internal class WaypointCarScreen(context: CarContext): Screen(context), SurfaceC
                 return screenActive() && controller.destinationActionVersion==destinationVersion &&
                     !current.navigating && current.selected?.id==selectedId && current.route===previewRoute
             }
-            val text=when { s.arrived->"You have arrived at ${s.selected.name}";s.routing->"Finding a ${s.mode.label.lowercase()} route…";s.routeError!=null->s.routeError;!s.gpsReady->s.gpsStatus;s.route!=null->"${kotlin.math.ceil(s.route.seconds/60).toInt()} min · ${formatDistance(s.route.meters,s.imperial)}";else->"Waiting for your route" }
+            val text=when { s.arrived->tr("You have arrived at ${s.selected.name}","הגעתם אל ${s.selected.name}");s.routing->tr("Finding a ${s.mode.label.lowercase()} route…","מחשבים ${s.mode.hebrewRoute}…");s.routeError!=null->s.routeError;!s.gpsReady->s.gpsStatus;s.route!=null->tr("${kotlin.math.ceil(s.route.seconds/60).toInt()} min · ${formatDistance(s.route.meters,s.imperial)}","${kotlin.math.ceil(s.route.seconds/60).toInt()} דק׳ · ${formatDistance(s.route.meters,s.imperial)}");else->tr("Waiting for your route","ממתינים למסלול") }
             val actions=ActionStrip.Builder()
             if(s.route!=null && s.gpsReady && !s.routing && !s.arrived)
-                actions.addAction(Action.Builder().setTitle("Start").setOnClickListener{if(previewCurrent() && !controller.state.value.arrived)controller.startNavigation()}.build())
+                actions.addAction(Action.Builder().setTitle(tr("Start","התחלה")).setOnClickListener{if(previewCurrent() && !controller.state.value.arrived)controller.startNavigation()}.build())
             if(s.routeError!=null)
-                actions.addAction(Action.Builder().setTitle("Retry").setOnClickListener{
+                actions.addAction(Action.Builder().setTitle(tr("Retry","ניסיון חוזר")).setOnClickListener{
                     if(previewCurrent() && !controller.state.value.routing && controller.state.value.routeError!=null)
                         controller.requestRoute()
                 }.build())
-            actions.addAction(Action.Builder().setTitle("Cancel").setOnClickListener{if(previewCurrent())controller.clearDestination()}.build())
+            actions.addAction(Action.Builder().setTitle(tr("Cancel","ביטול")).setOnClickListener{if(previewCurrent())controller.clearDestination()}.build())
             return NavigationTemplate.Builder()
                 .setNavigationInfo(MessageInfo.Builder(s.selected.name).setText(text).build())
                 .setMapActionStrip(mapActionStrip())
@@ -347,13 +347,13 @@ internal class WaypointCarScreen(context: CarContext): Screen(context), SurfaceC
                 .setActionStrip(actions.build()).build()
         }
         return NavigationTemplate.Builder()
-            .setNavigationInfo(MessageInfo.Builder(s.world.title).setText("Choose a destination").build())
+            .setNavigationInfo(MessageInfo.Builder(s.world.title).setText(tr("Choose a destination","בחרו יעד")).build())
             .setMapActionStrip(mapActionStrip())
             .setPanModeListener { }
             .setActionStrip(ActionStrip.Builder()
-                .addAction(Action.Builder().setTitle("Search").setOnClickListener{if(screenActive() && controller.state.value.selected==null)screenManager.push(WaypointCarSearchScreen(carContext))}.build())
-                .addAction(Action.Builder().setTitle("Destinations").setOnClickListener{if(screenActive() && controller.state.value.selected==null)screenManager.push(WaypointCarDestinationsScreen(carContext))}.build())
-                .addAction(Action.Builder().setTitle("Settings").setOnClickListener{if(screenActive())screenManager.push(WaypointCarSettingsScreen(carContext))}.build())
+                .addAction(Action.Builder().setTitle(tr("Search","חיפוש")).setOnClickListener{if(screenActive() && controller.state.value.selected==null)screenManager.push(WaypointCarSearchScreen(carContext))}.build())
+                .addAction(Action.Builder().setTitle(tr("Destinations","יעדים")).setOnClickListener{if(screenActive() && controller.state.value.selected==null)screenManager.push(WaypointCarDestinationsScreen(carContext))}.build())
+                .addAction(Action.Builder().setTitle(tr("Settings","הגדרות")).setOnClickListener{if(screenActive())screenManager.push(WaypointCarSettingsScreen(carContext))}.build())
                 .build()).build()
     }
     private fun updateMap() {

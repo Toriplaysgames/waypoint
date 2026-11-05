@@ -212,7 +212,7 @@ fun WaypointApp(controller: NavigationController,state: NavState,destinationLaun
     val navigationScope=rememberCoroutineScope()
     fun selectTab(destination:Int) {
         if(destination==3 && controller.state.value.carConnected) {
-            navigationScope.launch { snackbar.showSnackbar("Quests are available after Android Auto disconnects.") }
+            navigationScope.launch { snackbar.showSnackbar(tr("Quests are available after Android Auto disconnects.","המשימות יהיו זמינות אחרי ש-Android Auto יתנתק.")) }
         } else tab=destination
     }
     val permissions=rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
@@ -268,7 +268,7 @@ fun WaypointApp(controller: NavigationController,state: NavState,destinationLaun
             Row(Modifier.fillMaxSize()) {
                 if(wide && !state.navigating && !welcomeVisible) NavigationRail(containerColor=Ink,modifier=Modifier.statusBarsPadding()) {
                     if(!compactHeight) { Spacer(Modifier.height(16.dp));Icon(Icons.Default.Navigation,"Waypoint",tint=state.world.accent);Spacer(Modifier.height(32.dp)) }
-                    listOf("Map" to Icons.Default.Map,"Worlds" to Icons.Default.Layers,"Saved" to Icons.Default.BookmarkBorder,"Quests" to Icons.Default.Assignment).forEachIndexed { i,(name,icon)->NavigationRailItem(selected=tab==i,onClick={selectTab(i)},icon={Icon(icon,name)},label={Text(name)}) }
+                    listOf(tr("Map","מפה") to Icons.Default.Map,tr("Worlds","עולמות") to Icons.Default.Layers,tr("Saved","שמורים") to Icons.Default.BookmarkBorder,tr("Quests","משימות") to Icons.Default.Assignment).forEachIndexed { i,(name,icon)->NavigationRailItem(selected=tab==i,onClick={selectTab(i)},icon={Icon(icon,name)},label={Text(name)}) }
                 }
                 Scaffold(modifier=Modifier.weight(1f).withReadyWindowInsets(),snackbarHost={SnackbarHost(snackbar)},contentWindowInsets=WindowInsets(0),bottomBar={
                     if(!wide && !state.navigating && !welcomeVisible) HudNavigationBar(state.world,tab,{selectTab(it)})
@@ -304,7 +304,7 @@ fun WaypointApp(controller: NavigationController,state: NavState,destinationLaun
                                         if(state.navigating)ManeuverBanner(state,{steps=true}) else {
                                             Row(Modifier.background(hudPalette(state.world).panel,hudShape(state.world)),verticalAlignment=Alignment.CenterVertically) {
                                                 AtlasTool(state.world,Icons.AutoMirrored.Filled.ArrowBack,"Close route preview",controller::clearDestination)
-                                                AtlasText("ROUTE",state.world,Modifier.weight(1f).padding(horizontal=12.dp),22)
+                                                AtlasText(tr("ROUTE","מסלול"),state.world,Modifier.weight(1f).padding(horizontal=12.dp),22)
                                                 AtlasTool(state.world,Icons.Default.Layers,"Worlds",{tab=1})
                                                 AtlasTool(state.world,Icons.Default.Tune,"Settings",{settings=true})
                                             }
@@ -312,7 +312,7 @@ fun WaypointApp(controller: NavigationController,state: NavState,destinationLaun
                                         }
                                         if(mapError!=null)Notice(mapError!!,Icons.Default.CloudOff)
                                         if(state.navigating && !state.gpsReady)Notice(state.gpsStatus,Icons.Default.GpsOff)
-                                        if(state.navigating && state.routeError!=null)Notice("Reroute unavailable. ${state.routeError}",Icons.Default.CloudOff)
+                                        if(state.navigating && state.routeError!=null)Notice(tr("Reroute unavailable. ${state.routeError}","חישוב מסלול מחדש אינו זמין. ${state.routeError}"),Icons.Default.CloudOff)
                                     }
                                     Column(Modifier.align(if(compactHeight)Alignment.BottomEnd else Alignment.BottomCenter).fillMaxWidth(if(compactHeight)0.48f else 1f).onGloballyPositioned{routePanelBounds=it.boundsInRoot()}.padding(horizontal=16.dp).padding(bottom=56.dp).then(if(compactHeight)Modifier.heightIn(max=300.dp).verticalScroll(rememberScrollState()) else Modifier),verticalArrangement=Arrangement.spacedBy(10.dp)) {
                                         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.Bottom) {
@@ -320,9 +320,9 @@ fun WaypointApp(controller: NavigationController,state: NavState,destinationLaun
                                             if(state.navigating) AtlasTool(state.world,Icons.Default.Layers,"Worlds",{tab=1})
                                             if(state.navigating) AtlasTool(state.world,if(state.voice)Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,if(state.voice)"Mute guidance" else "Unmute guidance",controller::toggleVoice)
                                             if(compactHeight && !state.navigating) {
-                                                TextButton(onClick=atlasActions.locate,modifier=Modifier.heightIn(min=48.dp).background(hudPalette(state.world).panel,hudShape(state.world)).semantics{contentDescription="Use my location"}) {
+                                                TextButton(onClick=atlasActions.locate,modifier=Modifier.heightIn(min=48.dp).background(hudPalette(state.world).panel,hudShape(state.world)).semantics{contentDescription=tr("Use my location","שימוש במיקום שלי")}) {
                                                     Icon(Icons.Default.MyLocation,null,Modifier.size(18.dp),tint=hudPalette(state.world).foreground)
-                                                    Spacer(Modifier.width(8.dp));Text("Locate",fontFamily=PipBoyFont,fontSize=12.sp,color=hudPalette(state.world).foreground)
+                                                    Spacer(Modifier.width(8.dp));Text(tr("Locate","איתור"),fontFamily=PipBoyFont,fontSize=12.sp,color=hudPalette(state.world).foreground)
                                                 }
                                             } else AtlasTool(state.world,Icons.Default.MyLocation,"Use my location",atlasActions.locate)
                                         }
@@ -352,7 +352,7 @@ fun WaypointApp(controller: NavigationController,state: NavState,destinationLaun
                         )
                         AnimatedContent(targetState=tab,modifier=Modifier.fillMaxSize(),
                             transitionSpec={(fadeIn(tween(180,delayMillis=40)) togetherWith fadeOut(tween(100))).using(null)},
-                            label="Main destinations") { destination ->
+                            label=tr("Main destinations","יעדים עיקריים")) { destination ->
                             when(destination) {
                                 1 -> worldsStateHolder.SaveableStateProvider("worlds") {
                                     WorldsScreen(state.world,{controller.changeWorld(it);tab=0},{tab=0})
@@ -381,35 +381,37 @@ fun WaypointApp(controller: NavigationController,state: NavState,destinationLaun
                 FeedbackSheet(state.world,onBack={feedbackOpen=false},onLeaveApp={feedbackOpen=false;settings=false})
             } else {
             Column(Modifier.padding(horizontal=24.dp).verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(16.dp)) {
-                Text("Make it your own",style=MaterialTheme.typography.headlineLarge)
+                Text(tr("Make it your own","התאמה אישית"),style=MaterialTheme.typography.headlineLarge)
                 UpdatePanel((context.applicationContext as WaypointApplication).updater, state.navigating)
                 HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
-                SettingRow("Voice guidance","Spoken turn instructions",state.voice,controller::toggleVoice)
-                SettingRow("Game-style voice","World-themed phrases and tone. Turn details stay clear.",state.gameVoice,controller::toggleGameVoice)
-                SettingRow("Miles & feet","Use imperial distances",state.imperial,controller::toggleUnits)
-                SettingRow("3D perspective","Tilt the map in every world",state.tilted,controller::toggleTilt)
+                SettingRow(tr("Voice guidance","הנחיות קוליות"),tr("Spoken turn instructions","הוראות פנייה בקול"),state.voice,controller::toggleVoice)
+                SettingRow(tr("Game-style voice","קול בסגנון משחק"),tr("World-themed phrases and tone. Turn details stay clear.","משפטים וטון בהשראת העולם. פרטי הפנייה נשארים ברורים."),state.gameVoice,controller::toggleGameVoice)
+                SettingRow(tr("Miles & feet","מיילים ורגל"),tr("Use imperial distances","שימוש ביחידות מרחק אימפריאליות"),state.imperial,controller::toggleUnits)
+                SettingRow(tr("3D perspective","מבט תלת־ממדי"),tr("Tilt the map in every world","הטיית המפה בכל העולמות"),state.tilted,controller::toggleTilt)
+                HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
+                LanguageSetting(Muted)
                 HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
                 AndroidAutoSettingsPanel(state.carConnected,controller.hasLocationPermission(),state.navigating,
                     onLocation={context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:${context.packageName}")))},
                     onUnavailable={navigationScope.launch { snackbar.showSnackbar(context.getString(R.string.car_settings_unavailable)) }})
                 HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
-                Text("Location & sensors",style=MaterialTheme.typography.titleMedium)
+                Text(tr("Location & sensors","מיקום וחיישנים"),style=MaterialTheme.typography.titleMedium)
                 Text(state.locationProvider,style=MaterialTheme.typography.bodyMedium)
                 Text(state.sensorDescription,style=MaterialTheme.typography.bodySmall,color=Muted)
                 Text(state.headingStatus,style=MaterialTheme.typography.bodySmall,color=if(state.headingReliable)state.world.accent else Color(0xFFFFCF89))
-                if(state.fix!=null)Text("Position accuracy: ±${state.accuracy.roundToInt()} m",style=MaterialTheme.typography.bodySmall,color=Muted)
-                state.satellitesVisible?.let{Text("Satellites: ${state.satellitesUsed ?: 0} used / $it visible",style=MaterialTheme.typography.bodySmall,color=Muted)}
+                if(state.fix!=null)Text(tr("Position accuracy: ±${state.accuracy.roundToInt()} m","דיוק המיקום: ±${state.accuracy.roundToInt()} מ׳"),style=MaterialTheme.typography.bodySmall,color=Muted)
+                state.satellitesVisible?.let{Text(tr("Satellites: ${state.satellitesUsed ?: 0} used / $it visible","לוויינים: ${state.satellitesUsed ?: 0} בשימוש / $it נראים"),style=MaterialTheme.typography.bodySmall,color=Muted)}
                 Text(state.gpsStatus,style=MaterialTheme.typography.bodyMedium,color=Muted)
-                TextButton(onClick={context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))}) { Text("Open device location settings") }
-                TextButton(onClick={context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:${context.packageName}")))}) { Text("Manage location permissions") }
-                TextButton(onClick={clearConfirm=true}) { Text("Clear saved places and history",color=MaterialTheme.colorScheme.error) }
+                TextButton(onClick={context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))}) { Text(tr("Open device location settings","פתיחת הגדרות המיקום של המכשיר")) }
+                TextButton(onClick={context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:${context.packageName}")))}) { Text(tr("Manage location permissions","ניהול הרשאות המיקום")) }
+                TextButton(onClick={clearConfirm=true}) { Text(tr("Clear saved places and history","מחיקת המקומות השמורים וההיסטוריה"),color=MaterialTheme.colorScheme.error) }
                 HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
                 FeedbackSettingsRow(onClick={feedbackOpen=true})
                 Text("WAYPOINT",style=MaterialTheme.typography.headlineMedium,color=state.world.accent)
-                Text("Made in India · Open to the world",style=MaterialTheme.typography.bodySmall,color=Muted)
-                Text("Open source. Every world included. No ads or subscriptions.",style=MaterialTheme.typography.bodyMedium)
-                Text("Routes use OpenStreetMap with OSRM (car) and Valhalla (motorcycle/bicycle/walk). Ferrostar provides guidance and rerouting. Routes don't include live traffic. Online maps and search require internet. Your location and destination are shared with routing and search providers when needed; saved places stay on this phone.",style=MaterialTheme.typography.bodySmall,color=Muted)
-                Text("Original map styles inspired by games. Not affiliated with their publishers.",style=MaterialTheme.typography.bodySmall,color=Muted)
+                Text(tr("Made in India · Open to the world","נוצר בהודו · פתוח לכל העולם"),style=MaterialTheme.typography.bodySmall,color=Muted)
+                Text(tr("Open source. Every world included. No ads or subscriptions.","קוד פתוח. כל העולמות כלולים. בלי פרסומות ובלי מנויים."),style=MaterialTheme.typography.bodyMedium)
+                Text(tr("Routes use OpenStreetMap with OSRM (car) and Valhalla (motorcycle/bicycle/walk). Ferrostar provides guidance and rerouting. Routes don't include live traffic. Online maps and search require internet. Your location and destination are shared with routing and search providers when needed; saved places stay on this phone.","המסלולים מבוססים על OpenStreetMap עם OSRM (רכב) ו-Valhalla (אופנוע/אופניים/הליכה). Ferrostar מספק הנחיות וחישוב מסלול מחדש. המסלולים אינם כוללים מידע על תנועה בזמן אמת. מפות וחיפוש מקוונים דורשים חיבור לאינטרנט. המיקום והיעד שלך נשלחים לספקי הניתוב והחיפוש כשצריך; המקומות השמורים נשארים בטלפון הזה."),style=MaterialTheme.typography.bodySmall,color=Muted)
+                Text(tr("Original map styles inspired by games. Not affiliated with their publishers.","סגנונות מפה מקוריים בהשראת משחקים. אין קשר למפרסמים שלהם."),style=MaterialTheme.typography.bodySmall,color=Muted)
                 Spacer(Modifier.height(24.dp))
             }
             }
@@ -425,26 +427,26 @@ fun WaypointApp(controller: NavigationController,state: NavState,destinationLaun
         val sharedDestinationId = state.pendingSharedDestinationId
         if(sharedDestination!=null && !welcomeVisible && !state.navigating) AlertDialog(
             onDismissRequest={controller.dismissPendingNavigationImport(sharedDestinationId)},
-            title={Text("Open shared destination?")},
+            title={Text(tr("Open shared destination?","לפתוח את היעד ששותף?"))},
             text={Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
                 Text(sharedDestination.take(100),maxLines=2,overflow=TextOverflow.Ellipsis)
-                state.pendingSharedCoordinates?.let { Text("Coordinates: $it",style=MaterialTheme.typography.bodySmall,color=Muted) }
-                Text("Waypoint will use your location to look up this place and preview a route. Continue?",style=MaterialTheme.typography.bodyMedium)
+                state.pendingSharedCoordinates?.let { Text(tr("Coordinates: $it","קואורדינטות: $it"),style=MaterialTheme.typography.bodySmall,color=Muted) }
+                Text(tr("Waypoint will use your location to look up this place and preview a route. Continue?","Waypoint ישתמש במיקום שלך כדי לאתר את המקום ולהציג מסלול מקדים. להמשיך?"),style=MaterialTheme.typography.bodyMedium)
             }},
-            confirmButton={TextButton(onClick={search=false;tab=0;controller.acceptPendingNavigationImport(sharedDestinationId)}){Text("Open destination")}},
-            dismissButton={TextButton(onClick={controller.dismissPendingNavigationImport(sharedDestinationId)}){Text("Cancel")}},
+            confirmButton={TextButton(onClick={search=false;tab=0;controller.acceptPendingNavigationImport(sharedDestinationId)}){Text(tr("Open destination","פתיחת היעד"))}},
+            dismissButton={TextButton(onClick={controller.dismissPendingNavigationImport(sharedDestinationId)}){Text(tr("Cancel","ביטול"))}},
         )
-        externalPlace?.let { place -> AlertDialog(onDismissRequest={externalPlace=null},title={Text("Open in another map app?")},
-            text={Text(if(state.navigating)"Waypoint’s voice guidance will stop. The other app will calculate its own route to ${place.name}." else "Choose an app to open ${place.name}. It will calculate its own route.")},
+        externalPlace?.let { place -> AlertDialog(onDismissRequest={externalPlace=null},title={Text(tr("Open in another map app?","לפתוח באפליקציית מפות אחרת?"))},
+            text={Text(if(state.navigating)tr("Waypoint’s voice guidance will stop. The other app will calculate its own route to ${place.name}.","ההנחיות הקוליות של Waypoint ייפסקו. האפליקציה האחרת תחשב מסלול משלה אל ${place.name}.") else tr("Choose an app to open ${place.name}. It will calculate its own route.","בחרו אפליקציה שתפתח את ${place.name}. היא תחשב מסלול משלה."))},
             confirmButton={TextButton(onClick={
                 externalPlace=null
                 runCatching { NavigationSharing.open(context,place,state.mode) }.onSuccess { if(state.navigating)controller.stopNavigation() }
-                    .onFailure { uiScope.launch { snackbar.showSnackbar("No map app could open this place. Install a map app or try again.") } }
-            }){Text("Choose app")}},dismissButton={TextButton(onClick={externalPlace=null}){Text("Cancel")}}) }
-        if(clearConfirm) AlertDialog(onDismissRequest={clearConfirm=false},title={Text("Clear your places?")},text={Text("This removes your saved destinations and recent navigation history from this phone.")},confirmButton={TextButton(onClick={controller.clearHistory();clearConfirm=false}){Text("Clear places")}},dismissButton={TextButton(onClick={clearConfirm=false}){Text("Cancel")}})
+                    .onFailure { uiScope.launch { snackbar.showSnackbar(tr("No map app could open this place. Install a map app or try again.","אף אפליקציית מפות לא הצליחה לפתוח את המקום. התקינו אפליקציית מפות או נסו שוב.")) } }
+            }){Text(tr("Choose app","בחירת אפליקציה"))}},dismissButton={TextButton(onClick={externalPlace=null}){Text(tr("Cancel","ביטול"))}}) }
+        if(clearConfirm) AlertDialog(onDismissRequest={clearConfirm=false},title={Text(tr("Clear your places?","למחוק את המקומות שלך?"))},text={Text(tr("This removes your saved destinations and recent navigation history from this phone.","הפעולה מוחקת מהטלפון את היעדים השמורים ואת היסטוריית הניווט האחרונה."))},confirmButton={TextButton(onClick={controller.clearHistory();clearConfirm=false}){Text(tr("Clear places","מחיקת המקומות"))}},dismissButton={TextButton(onClick={clearConfirm=false}){Text(tr("Cancel","ביטול"))}})
         if(steps) ModalBottomSheet(onDismissRequest={steps=false},containerColor=Ink) {
-            Text("Your route",style=MaterialTheme.typography.headlineLarge,modifier=Modifier.padding(horizontal=24.dp))
-            state.selected?.let { place -> TextButton(onClick={steps=false;externalPlace=place},modifier=Modifier.padding(horizontal=16.dp).heightIn(min=48.dp)) { Text("Open in another map app") } }
+            Text(tr("Your route","המסלול שלך"),style=MaterialTheme.typography.headlineLarge,modifier=Modifier.padding(horizontal=24.dp))
+            state.selected?.let { place -> TextButton(onClick={steps=false;externalPlace=place},modifier=Modifier.padding(horizontal=16.dp).heightIn(min=48.dp)) { Text(tr("Open in another map app","פתיחה באפליקציית מפות אחרת")) } }
             LazyColumn(Modifier.fillMaxWidth().padding(vertical=16.dp)) {
                 items(state.route?.steps.orEmpty().drop(if(state.navigating)state.progress?.nextStep ?: 0 else 0)) { step ->
                     ListItem(headlineContent={Text(step.instruction)},supportingContent={Text(formatDistance(step.distance,state.imperial))},leadingContent={Icon(maneuverIcon(step),null,tint=state.world.accent)},colors=ListItemDefaults.colors(containerColor=Ink))
@@ -459,16 +461,16 @@ fun WaypointApp(controller: NavigationController,state: NavState,destinationLaun
 @Composable fun Attribution(world:World) {
     val uri=LocalUriHandler.current
     var open by remember { mutableStateOf(false) }
-    TextButton(onClick={open=true},modifier=Modifier.heightIn(min=48.dp).semantics{contentDescription="Map information"}) {
-        Row(Modifier.background(Ink.copy(alpha=.94f),RoundedCornerShape(4.dp)).padding(horizontal=8.dp,vertical=6.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(4.dp)){Icon(Icons.Default.Info,null,Modifier.size(14.dp),tint=Cream);Text("Map info",color=Cream,fontSize=11.sp)}
+    TextButton(onClick={open=true},modifier=Modifier.heightIn(min=48.dp).semantics{contentDescription=tr("Map information","מידע על המפה")}) {
+        Row(Modifier.background(Ink.copy(alpha=.94f),RoundedCornerShape(4.dp)).padding(horizontal=8.dp,vertical=6.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(4.dp)){Icon(Icons.Default.Info,null,Modifier.size(14.dp),tint=Cream);Text(tr("Map info","מידע על המפה"),color=Cream,fontSize=11.sp)}
     }
-    if(open) AlertDialog(onDismissRequest={open=false},title={Text("Map information")},text={
+    if(open) AlertDialog(onDismissRequest={open=false},title={Text(tr("Map information","מידע על המפה"))},text={
         Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick={uri.openUri("https://www.openstreetmap.org/copyright")}){Text("© OpenStreetMap contributors")}
-            TextButton(onClick={uri.openUri("https://openfreemap.org/")}){Text("Map tiles · OpenFreeMap")}
-            if(world.hasTerrain())TextButton(onClick={uri.openUri("https://github.com/tilezen/joerd/blob/master/docs/attribution.md")}){Text("Terrain · Mapzen and data providers")}
+            TextButton(onClick={uri.openUri("https://www.openstreetmap.org/copyright")}){Text(tr("© OpenStreetMap contributors","© התורמים ל-OpenStreetMap"))}
+            TextButton(onClick={uri.openUri("https://openfreemap.org/")}){Text(tr("Map tiles · OpenFreeMap","אריחי מפה · OpenFreeMap"))}
+            if(world.hasTerrain())TextButton(onClick={uri.openUri("https://github.com/tilezen/joerd/blob/master/docs/attribution.md")}){Text(tr("Terrain · Mapzen and data providers","תבליט · Mapzen וספקי נתונים"))}
         }
-    },confirmButton={TextButton(onClick={open=false}){Text("Close")}})
+    },confirmButton={TextButton(onClick={open=false}){Text(tr("Close","סגירה"))}})
 }
 @Composable fun SettingRow(title:String,subtitle:String,checked:Boolean,action:()->Unit) { Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) { Column(Modifier.weight(1f)){Text(title,style=MaterialTheme.typography.titleMedium);Text(subtitle,style=MaterialTheme.typography.bodySmall,color=Muted)};Switch(checked,onCheckedChange={action()},modifier=Modifier.semantics { contentDescription=title }) } }
 fun maneuverIcon(step: Maneuver?): ImageVector = when { step==null->Icons.Default.North; step.type=="arrive"->Icons.Default.Flag; step.type.contains("roundabout")||step.type.contains("rotary")->Icons.Default.RoundaboutRight; step.modifier=="uturn"->if(step.uTurnRight)Icons.Default.UTurnRight else Icons.Default.UTurnLeft; step.modifier.contains("left")->Icons.Default.TurnLeft;step.modifier.contains("right")->Icons.Default.TurnRight;else->Icons.Default.Straight }
@@ -476,51 +478,51 @@ fun maneuverIcon(step: Maneuver?): ImageVector = when { step==null->Icons.Defaul
 @Composable fun ManeuverBanner(state: NavState,onClick:()->Unit) = HudManeuver(state,onClick)
 @Composable fun NavigationFooter(state: NavState,onSteps:()->Unit,onStop:()->Unit) = HudRouteFooter(state,onSteps,onStop)
 private fun placeCategory(kind:String):Pair<ImageVector,String> = when(kind.lowercase(Locale.ROOT)) {
-    "restaurant","fast_food","ice_cream","food" -> Icons.Default.Restaurant to "Food"
-    "cafe","coffee_shop" -> Icons.Default.LocalCafe to "Café"
-    "bar","beer","pub" -> Icons.Default.LocalBar to "Drinks & pubs"
-    "lodging","hotel","hostel","guest_house" -> Icons.Default.Hotel to "Stay"
-    "fuel" -> Icons.Default.LocalGasStation to "Fuel"
-    "parking" -> Icons.Default.LocalParking to "Parking"
-    "shop","grocery","alcohol_shop" -> Icons.Default.Store to "Shop"
-    "attraction","art_gallery","castle","museum","library" -> Icons.Default.Explore to "Explore"
-    "hospital","pharmacy" -> Icons.Default.LocalHospital to "Health"
-    "park" -> Icons.Default.Park to "Park"
-    "atm" -> Icons.Default.AttachMoney to "ATM"
-    else -> Icons.Default.Place to "Place"
+    "restaurant","fast_food","ice_cream","food" -> Icons.Default.Restaurant to tr("Food","אוכל")
+    "cafe","coffee_shop" -> Icons.Default.LocalCafe to tr("Café","בית קפה")
+    "bar","beer","pub" -> Icons.Default.LocalBar to tr("Drinks & pubs","משקאות ופאבים")
+    "lodging","hotel","hostel","guest_house" -> Icons.Default.Hotel to tr("Stay","לינה")
+    "fuel" -> Icons.Default.LocalGasStation to tr("Fuel","דלק")
+    "parking" -> Icons.Default.LocalParking to tr("Parking","חניה")
+    "shop","grocery","alcohol_shop" -> Icons.Default.Store to tr("Shop","חנות")
+    "attraction","art_gallery","castle","museum","library" -> Icons.Default.Explore to tr("Explore","אטרקציה")
+    "hospital","pharmacy" -> Icons.Default.LocalHospital to tr("Health","בריאות")
+    "park" -> Icons.Default.Park to tr("Park","פארק")
+    "atm" -> Icons.Default.AttachMoney to tr("ATM","כספומט")
+    else -> Icons.Default.Place to tr("Place","מקום")
 }
 @OptIn(ExperimentalLayoutApi::class)
 @Composable fun DestinationCard(state: NavState,onSave:()->Unit,onClose:()->Unit,onLocate:()->Unit,onRetry:()->Unit,onStart:()->Unit,onSteps:()->Unit,compact:Boolean=false,onQuest:(()->Unit)?=null,onShare:(()->Unit)?=null,roomyActions:Boolean=false) {
     val place=state.selected ?: return
     val palette=hudPalette(state.world)
     val (categoryIcon,categoryLabel)=placeCategory(place.kind)
-    val detail=if(place.address=="Selected on map")"$categoryLabel · Selected on map" else place.address
+    val detail=if(place.address=="Selected on map")tr("$categoryLabel · Selected on map","$categoryLabel · נבחר במפה") else place.address
     val expandedActions=roomyActions || LocalDensity.current.fontScale>1.3f
     Surface(color=palette.panel,contentColor=palette.foreground,shape=hudShape(state.world),border=hudBorder(state.world),modifier=Modifier.fillMaxWidth()) {
         Column(Modifier.padding(if(compact)12.dp else 16.dp),verticalArrangement=Arrangement.spacedBy(if(compact)8.dp else 12.dp)) {
             Row(verticalAlignment=Alignment.CenterVertically) {
                 Surface(color=palette.accent.copy(alpha=.15f),shape=hudShape(state.world)) {Icon(categoryIcon,categoryLabel,Modifier.padding(10.dp).size(22.dp),tint=palette.accent)}
                 Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) { Text(if(state.arrived)"YOU HAVE ARRIVED" else place.name,style=if(compact)MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,maxLines=2,overflow=TextOverflow.Ellipsis);Text(if(state.arrived)place.name else detail,style=MaterialTheme.typography.bodySmall,color=palette.muted,maxLines=if(compact)1 else 2,overflow=TextOverflow.Ellipsis) }
+                Column(Modifier.weight(1f)) { Text(if(state.arrived)tr("YOU HAVE ARRIVED","הגעתם ליעד") else place.name,style=if(compact)MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,maxLines=2,overflow=TextOverflow.Ellipsis);Text(if(state.arrived)place.name else detail,style=MaterialTheme.typography.bodySmall,color=palette.muted,maxLines=if(compact)1 else 2,overflow=TextOverflow.Ellipsis) }
                 if(!expandedActions) DestinationActions(state,onSave,onQuest,onShare,false)
             }
             if(expandedActions) DestinationActions(state,onSave,onQuest,onShare,true)
             when {
-                state.arrived -> Button(onClick=onClose,modifier=Modifier.fillMaxWidth()) { Text("Done") }
-                state.routing -> { LinearProgressIndicator(modifier=Modifier.fillMaxWidth());Text("Finding a ${state.mode.routeDescription} route…",style=MaterialTheme.typography.bodySmall,color=palette.muted) }
-                state.routeError!=null -> { Text(state.routeError,style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.error);Button(onClick=onRetry,modifier=Modifier.fillMaxWidth()){Text("Try route again")} }
+                state.arrived -> Button(onClick=onClose,modifier=Modifier.fillMaxWidth()) { Text(tr("Done","סיום")) }
+                state.routing -> { LinearProgressIndicator(modifier=Modifier.fillMaxWidth());Text(tr("Finding a ${state.mode.routeDescription} route…","מחשבים ${state.mode.hebrewRoute}…"),style=MaterialTheme.typography.bodySmall,color=palette.muted) }
+                state.routeError!=null -> { Text(state.routeError,style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.error);Button(onClick=onRetry,modifier=Modifier.fillMaxWidth()){Text(tr("Try route again","ניסיון חוזר לחישוב המסלול"))} }
                 state.route!=null -> {
                     FlowRow(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(4.dp)) {
                         Row(Modifier.align(Alignment.CenterVertically),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                             Icon(modeIcon(state.mode),null,tint=palette.muted,modifier=Modifier.size(20.dp))
-                            Text("${ceil(state.route.seconds/60).toInt().coerceAtLeast(1)} min",style=MaterialTheme.typography.titleLarge,color=palette.accent)
+                            Text(tr("${ceil(state.route.seconds/60).toInt().coerceAtLeast(1)} min","${ceil(state.route.seconds/60).toInt().coerceAtLeast(1)} דק׳"),style=MaterialTheme.typography.titleLarge,color=palette.accent)
                         }
                         Text("· ${formatDistance(state.route.meters,state.imperial)}",color=palette.muted,style=MaterialTheme.typography.bodyMedium,modifier=Modifier.align(Alignment.CenterVertically))
-                        TextButton(onClick=onSteps,modifier=Modifier.align(Alignment.CenterVertically)){Text("Steps",color=palette.accent)}
+                        TextButton(onClick=onSteps,modifier=Modifier.align(Alignment.CenterVertically)){Text(tr("Steps","שלבים"),color=palette.accent)}
                     }
-                    Button(onClick=onStart,enabled=state.gpsReady,modifier=Modifier.fillMaxWidth().heightIn(min=50.dp),shape=hudShape(state.world)) { Icon(Icons.Default.Navigation,null,Modifier.size(18.dp));Spacer(Modifier.width(10.dp));Text(if(state.gpsReady)"Start navigation" else "Waiting for GPS…",fontWeight=FontWeight.Bold) }
+                    Button(onClick=onStart,enabled=state.gpsReady,modifier=Modifier.fillMaxWidth().heightIn(min=50.dp),shape=hudShape(state.world)) { Icon(Icons.Default.Navigation,null,Modifier.size(18.dp));Spacer(Modifier.width(10.dp));Text(if(state.gpsReady)tr("Start navigation","התחלת ניווט") else tr("Waiting for GPS…","ממתינים ל-GPS…"),fontWeight=FontWeight.Bold) }
                 }
-                else -> { Text("Use your precise location to get ${state.mode.routeDescription} directions.",style=MaterialTheme.typography.bodySmall,color=palette.muted);Button(onClick=onLocate,modifier=Modifier.fillMaxWidth()){Text("Enable GPS for directions")} }
+                else -> { Text(tr("Use your precise location to get ${state.mode.routeDescription} directions.","כדי לקבל ${state.mode.hebrewRoute}, השתמשו במיקום המדויק שלך."),style=MaterialTheme.typography.bodySmall,color=palette.muted);Button(onClick=onLocate,modifier=Modifier.fillMaxWidth()){Text(tr("Enable GPS for directions","הפעלת GPS לקבלת מסלול"))} }
             }
         }
     }
@@ -531,31 +533,31 @@ private fun placeCategory(kind:String):Pair<ImageVector,String> = when(kind.lowe
     fun submit(){keyboard?.hide();onSubmit()}
     Column(Modifier.fillMaxSize().background(Ink).statusBarsPadding().imePadding()) {
         Row(Modifier.padding(12.dp),verticalAlignment=Alignment.CenterVertically) {
-            IconButton(onClick=onBack){Icon(Icons.AutoMirrored.Filled.ArrowBack,"Back to map")}
-            OutlinedTextField(value=state.query,onValueChange={onQuery(it.take(NavigationSharing.MAX_INPUT))},label={Text("Place or address")},singleLine=true,keyboardOptions=KeyboardOptions(imeAction=ImeAction.Search),keyboardActions=KeyboardActions(onSearch={submit()}),modifier=Modifier.weight(1f),shape=hudShape(state.world),trailingIcon={if(state.query.isNotEmpty())IconButton(onClick={onQuery("")}){Icon(Icons.Default.Close,"Clear search")}})
+            IconButton(onClick=onBack){Icon(Icons.AutoMirrored.Filled.ArrowBack,tr("Back to map","חזרה למפה"))}
+            OutlinedTextField(value=state.query,onValueChange={onQuery(it.take(NavigationSharing.MAX_INPUT))},label={Text(tr("Place or address","מקום או כתובת"))},singleLine=true,keyboardOptions=KeyboardOptions(imeAction=ImeAction.Search),keyboardActions=KeyboardActions(onSearch={submit()}),modifier=Modifier.weight(1f),shape=hudShape(state.world),trailingIcon={if(state.query.isNotEmpty())IconButton(onClick={onQuery("")}){Icon(Icons.Default.Close,tr("Clear search","ניקוי החיפוש"))}})
         }
         Button(onClick={submit()},enabled=state.query.trim().length>=2,shape=hudShape(state.world),modifier=Modifier.fillMaxWidth().padding(horizontal=24.dp)) {
-            Icon(Icons.Default.Search,null,Modifier.size(20.dp));Spacer(Modifier.width(8.dp));Text("Search places")
+            Icon(Icons.Default.Search,null,Modifier.size(20.dp));Spacer(Modifier.width(8.dp));Text(tr("Search places","חיפוש מקומות"))
         }
         Box(Modifier.padding(horizontal=16.dp)){TransportModes(state.mode,onMode,state.world)}
-        Text(if(state.fix==null)"Search worldwide · preview near Kolkata" else "Search near your location",style=MaterialTheme.typography.bodySmall,color=Muted,modifier=Modifier.padding(horizontal=24.dp,vertical=12.dp))
+        Text(if(state.fix==null)tr("Search worldwide · preview near Kolkata","חיפוש בכל העולם · תצוגה מקדימה ליד קולקטה") else tr("Search near your location","חיפוש בקרבת המיקום שלך"),style=MaterialTheme.typography.bodySmall,color=Muted,modifier=Modifier.padding(horizontal=24.dp,vertical=12.dp))
         if(state.searchNote!=null)Text(state.searchNote,style=MaterialTheme.typography.bodySmall,color=Muted,modifier=Modifier.padding(horizontal=24.dp,vertical=8.dp))
         if(state.searching) LinearProgressIndicator(Modifier.fillMaxWidth().padding(horizontal=24.dp))
-        if(state.searchError!=null) { Notice(state.searchError,Icons.Default.CloudOff);TextButton(onClick={submit()}){Text("Retry search")} }
+        if(state.searchError!=null) { Notice(state.searchError,Icons.Default.CloudOff);TextButton(onClick={submit()}){Text(tr("Retry search","ניסיון חוזר לחיפוש"))} }
         LazyColumn {
             if(state.query.length<2) {
-                item { Text(if(state.recent.isEmpty())"Your next destination starts here." else "Recent destinations",style=MaterialTheme.typography.titleMedium,modifier=Modifier.padding(24.dp)) }
+                item { Text(if(state.recent.isEmpty())tr("Your next destination starts here.","היעד הבא שלך מתחיל כאן.") else tr("Recent destinations","יעדים אחרונים"),style=MaterialTheme.typography.titleMedium,modifier=Modifier.padding(24.dp)) }
                 items(state.recent,key={it.id}){PlaceRow(it,state,onSelect)}
-                if(state.recent.isEmpty()) item { Text("Find an address, a landmark, or your next coffee stop. You can also press and hold the map to drop a pin.",color=Muted,style=MaterialTheme.typography.bodyMedium,modifier=Modifier.padding(horizontal=24.dp)) }
+                if(state.recent.isEmpty()) item { Text(tr("Find an address, a landmark, or your next coffee stop. You can also press and hold the map to drop a pin.","חפשו כתובת, ציון דרך או בית הקפה הבא. אפשר גם ללחוץ לחיצה ארוכה על המפה כדי להניח נעץ."),color=Muted,style=MaterialTheme.typography.bodyMedium,modifier=Modifier.padding(horizontal=24.dp)) }
             } else {
                 items(state.searchResults,key={it.id}){PlaceRow(it,state,onSelect)}
-                if(!state.searching && state.searchResults.isEmpty() && state.searchError==null && state.searchNote==null) item{Text("No places found. Try a street, city, or fuller address.",modifier=Modifier.padding(24.dp),color=Muted)}
+                if(!state.searching && state.searchResults.isEmpty() && state.searchError==null && state.searchNote==null) item{Text(tr("No places found. Try a street, city, or fuller address.","לא נמצאו מקומות. נסו רחוב, עיר או כתובת מלאה יותר."),modifier=Modifier.padding(24.dp),color=Muted)}
             }
         }
     }
 }
 @Composable fun PlaceRow(place: Place,state: NavState,onSelect:(Place)->Unit) {
-    ListItem(headlineContent={Text(place.name,maxLines=2,overflow=TextOverflow.Ellipsis)},supportingContent={Column { Text(place.address,maxLines=3,overflow=TextOverflow.Ellipsis);if(place.source.isNotEmpty())Text(place.source,style=MaterialTheme.typography.labelSmall,color=Muted) }},leadingContent={Icon(Icons.Default.Place,null,tint=state.world.accent)},trailingContent={state.fix?.let{Text(formatDistance(distance(it,place.point),state.imperial),style=MaterialTheme.typography.labelSmall,color=Muted)}},modifier=Modifier.clickable{onSelect(place)},colors=ListItemDefaults.colors(containerColor=Ink))
+    ListItem(headlineContent={Text(place.name,maxLines=2,overflow=TextOverflow.Ellipsis)},supportingContent={Column { Text(place.shownAddress,maxLines=3,overflow=TextOverflow.Ellipsis);if(place.source.isNotEmpty())Text(place.source,style=MaterialTheme.typography.labelSmall,color=Muted) }},leadingContent={Icon(Icons.Default.Place,null,tint=state.world.accent)},trailingContent={state.fix?.let{Text(formatDistance(distance(it,place.point),state.imperial),style=MaterialTheme.typography.labelSmall,color=Muted)}},modifier=Modifier.clickable{onSelect(place)},colors=ListItemDefaults.colors(containerColor=Ink))
 }
 @Composable fun WorldsScreen(selected: World,onSelect:(World)->Unit,onClose:()->Unit) = HudLibrary(selected,onSelect,onClose)
 internal enum class WorldRouteStyle { URBAN, NEON, PIXEL, TRAIL, COAST }

@@ -289,28 +289,28 @@ private fun IntroStoryPage(
             when (page) {
                 0 -> {
                     IntroHeading("Waypoint", (49 * titleScale).toInt())
-                    IntroHeading("Real streets", (42 * titleScale).toInt())
-                    IntroHeading("new worlds", (36 * titleScale).toInt())
+                    IntroHeading(tr("Real streets","רחובות אמיתיים"), (42 * titleScale).toInt())
+                    IntroHeading(tr("new worlds","עולמות חדשים"), (36 * titleScale).toInt())
                 }
                 1 -> {
-                    IntroHeading("Map Icons of your", (34 * titleScale).toInt())
+                    IntroHeading(tr("Map Icons of your","סמלי המפה של"), (34 * titleScale).toInt())
                     IntroHeading(stringResource(R.string.favorite_game), (47 * titleScale).toInt())
                 }
                 2 -> {
-                    IntroHeading("Navigate with", (34 * titleScale).toInt())
-                    IntroHeading("your phone", (49 * titleScale).toInt())
+                    IntroHeading(tr("Navigate with","ניווט עם"), (34 * titleScale).toInt())
+                    IntroHeading(tr("your phone","הטלפון שלך"), (49 * titleScale).toInt())
                 }
             }
             Spacer(Modifier.height(18.dp))
             val description = when (page) {
                 0 -> stringResource(R.string.intro_find_game)
                 1 -> stringResource(R.string.intro_real_streets)
-                else -> "Follow real routes on a game-inspired map with clear turn-by-turn voice guidance."
+                else -> tr("Follow real routes on a game-inspired map with clear turn-by-turn voice guidance.","מסלולים אמיתיים על מפה בהשראת משחקים, עם הנחיות קוליות ברורות לכל פנייה.")
             }
             Text(description, color = introMuted, fontFamily = introFont, fontSize = 16.sp,
                 lineHeight = 20.sp, textAlign = TextAlign.Center, maxLines = 3)
         }
-        OnboardingAction("Continue", true, onContinue)
+        OnboardingAction(tr("Continue","המשך"), true, onContinue)
     }
 }
 
@@ -529,7 +529,7 @@ private fun ReferralPage(selected: String, onSelect: (String) -> Unit, onContinu
     Box(Modifier.fillMaxSize().background(introBackground()).statusBarsPadding()) {
         Column(Modifier.fillMaxSize().padding(horizontal = 24.dp).padding(top = 22.dp, bottom = 115.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Where did you hear\nabout us?", color = introWhite, fontFamily = introFont,
+            Text(tr("Where did you hear\nabout us?","איך שמעת\nעלינו?"), color = introWhite, fontFamily = introFont,
                 fontWeight = FontWeight.ExtraBold, fontSize = 33.sp, lineHeight = 41.sp,
                 textAlign = TextAlign.Center)
             Spacer(Modifier.height(20.dp))
@@ -550,14 +550,14 @@ private fun ReferralPage(selected: String, onSelect: (String) -> Unit, onContinu
                             }
                         }
                         Spacer(Modifier.size(17.dp))
-                        Text(name, color = introWhite, fontFamily = introFont,
+                        Text(if (name == "Friend") tr("Friend", "חברים") else name, color = introWhite, fontFamily = introFont,
                             modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 17.sp)
                         if (selected == name) Icon(Icons.Default.Check, null, Modifier.size(20.dp), tint = introWhite)
                     }
                 }
             }
         }
-        OnboardingAction("Continue", true, onContinue, selected.isNotBlank())
+        OnboardingAction(tr("Continue","המשך"), true, onContinue, selected.isNotBlank())
     }
 }
 
@@ -602,7 +602,7 @@ private fun FavoriteGamesPage(selected: Set<String>, onToggle: (World) -> Unit, 
                 Spacer(Modifier.height(16.dp))
             }
         }
-        OnboardingAction("Continue", true, onContinue, selected.isNotEmpty())
+        OnboardingAction(tr("Continue","המשך"), true, onContinue, selected.isNotEmpty())
     }
 }
 
@@ -626,6 +626,7 @@ private fun OnboardingMapCarousel(
     onMove: (Int) -> Unit,
     onContinue: () -> Unit,
 ) {
+    val rtl = isRtl()
     BoxWithConstraints(Modifier.fillMaxSize().background(Color(0xFF020903))) {
         // The reference presents a close view of a sphere. Keep the surface
         // inside a viewport above the controls so its native layer cannot
@@ -634,11 +635,11 @@ private fun OnboardingMapCarousel(
         Box(Modifier.align(Alignment.TopCenter).offset(y = 170.dp)
             .fillMaxWidth().height(globeViewportHeight).clipToBounds()) {
             OnboardingGlobe(world, Modifier.fillMaxSize(), closeUp = true)
-            Box(Modifier.fillMaxSize().pointerInput(world) {
+            Box(Modifier.fillMaxSize().pointerInput(world, rtl) {
                 var distance = 0f
                 detectHorizontalDragGestures(
                     onHorizontalDrag = { change, amount -> distance += amount; change.consume() },
-                    onDragEnd = { if (abs(distance) > 55f) onMove(if (distance < 0) 1 else -1); distance = 0f },
+                    onDragEnd = { if (abs(distance) > 55f) onMove(swipeStep(distance, rtl)); distance = 0f },
                     onDragCancel = { distance = 0f },
                 )
             })
@@ -649,26 +650,26 @@ private fun OnboardingMapCarousel(
         )))
         Column(Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 7.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Select Map to", color = Color.White, fontFamily = introFont,
+            Text(tr("Select Map to","בחרו מפה"), color = Color.White, fontFamily = introFont,
                 fontWeight = FontWeight.ExtraBold, fontSize = 30.sp)
-            Text("Start", color = Color.White, fontFamily = introFont,
+            Text(tr("Start","כדי להתחיל"), color = Color.White, fontFamily = introFont,
                 fontWeight = FontWeight.ExtraBold, fontSize = 39.sp)
         }
         Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(horizontal = 23.dp, vertical = 133.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            CarouselArrow(Icons.AutoMirrored.Filled.ArrowBack, "Previous map") { onMove(-1) }
+            CarouselArrow(Icons.AutoMirrored.Filled.ArrowBack, tr("Previous map","המפה הקודמת")) { onMove(-1) }
             Text(carouselName(world), Modifier.weight(1f).padding(horizontal = 6.dp),
                 color = Color.White, fontFamily = worldFont(world), fontWeight = FontWeight.Bold,
                 fontSize = 24.sp, maxLines = 1, textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis)
-            CarouselArrow(Icons.AutoMirrored.Filled.ArrowForward, "Next map") { onMove(1) }
+            CarouselArrow(Icons.AutoMirrored.Filled.ArrowForward, tr("Next map","המפה הבאה")) { onMove(1) }
         }
         Text("${index + 1} / $worldCount",
             Modifier.align(Alignment.BottomCenter).padding(bottom = 106.dp)
-                .semantics { contentDescription = "Map ${index + 1} of $worldCount" },
+                .semantics { contentDescription = tr("Map ${index + 1} of $worldCount","מפה ${index + 1} מתוך $worldCount") },
             color = Color.White.copy(alpha = .8f), fontFamily = introFont,
             fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        OnboardingAction("Continue", false, onContinue)
+        OnboardingAction(tr("Continue","המשך"), false, onContinue)
     }
 }
 
@@ -702,24 +703,24 @@ private fun OnboardingLocationPage(
         Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth()
             .padding(horizontal = 20.dp).padding(bottom = 120.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
-            IntroHeading("Allow location for", 33)
+            IntroHeading(tr("Allow location for","לאפשר מיקום עבור"), 33)
             IntroHeading("Waypoint", 48)
             Spacer(Modifier.height(18.dp))
-            Text("Waypoint uses your location to show where you are and guide you along real routes.",
+            Text(tr("Waypoint uses your location to show where you are and guide you along real routes.","Waypoint משתמש במיקום כדי להראות היכן נמצאים ולהנחות במסלולים אמיתיים."),
                 color = introMuted, fontFamily = introFont, fontSize = 16.sp,
                 lineHeight = 21.sp, textAlign = TextAlign.Center)
             if (permissionDenied && !hasPermission) {
                 Spacer(Modifier.height(8.dp))
-                Text("Location is off. Enable it in Android settings or explore without it.",
+                Text(tr("Location is off. Enable it in Android settings or explore without it.","המיקום כבוי. אפשר להפעיל אותו בהגדרות Android או להמשיך לגלות בלעדיו."),
                     color = introWhite, fontFamily = introFont, fontSize = 13.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.clickable(role = Role.Button, onClick = onSettings))
             }
         }
-        OnboardingAction(if (hasPermission) "Open map" else "Allow location", false,
+        OnboardingAction(if (hasPermission) tr("Open map","פתיחת המפה") else tr("Allow location","אישור מיקום"), false,
             if (hasPermission) onContinue else onAllow, bottomPadding = if (hasPermission) 30.dp else 61.dp)
         if (!hasPermission) {
-            Text("Continue without location", Modifier.align(Alignment.BottomCenter)
+            Text(tr("Continue without location","המשך בלי מיקום"), Modifier.align(Alignment.BottomCenter)
                 .padding(bottom = 14.dp).clickable(role = Role.Button, onClick = onContinue)
                 .padding(7.dp), color = introWhite, fontFamily = introFont, fontSize = 13.sp)
         }

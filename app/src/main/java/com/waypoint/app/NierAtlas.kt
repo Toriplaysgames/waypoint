@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
                 }
             }
         }
-        AtlasFind(s.world, a, label = "Find a place")
+        AtlasFind(s.world, a, label = tr("Find a place","חיפוש מקום"))
     }
     Column(Modifier.align(Alignment.BottomStart).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Surface(color = p.panel, shape = hudShape(s.world), border = hudBorder(s.world)) {
@@ -49,6 +49,6 @@ import androidx.compose.ui.unit.dp
     }
     Column(Modifier.align(Alignment.BottomEnd).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         CompassRose(heading, s.world, onRecenter = a.locate)
-        AtlasAction(s.world, "Locate", a.locate)
+        AtlasAction(s.world, tr("Locate","איתור"), a.locate)
     }
 }

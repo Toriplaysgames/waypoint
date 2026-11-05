@@ -39,16 +39,16 @@ data class NavState(
     val accuracy: Float = 0f,
     val bearing: Float = 0f,
     val speed: Float = 0f,
-    val headingStatus: String = "Waiting for heading",
+    val headingStatus: String = tr("Waiting for heading","ממתינים לכיוון"),
     val headingReliable: Boolean = false,
     val headingSource: HeadingSource = HeadingSource.NONE,
-    val sensorDescription: String = "Checking phone sensors",
-    val locationProvider: String = "Not connected",
+    val sensorDescription: String = tr("Checking phone sensors","בודקים את חיישני הטלפון"),
+    val locationProvider: String = tr("Not connected","לא מחובר"),
     val satellitesUsed: Int? = null,
     val satellitesVisible: Int? = null,
-    val gpsStatus: String = "GPS not connected",
+    val gpsStatus: String = tr("GPS not connected","GPS לא מחובר"),
     val gpsReady: Boolean = false,
-    val city: String = "Kolkata · map preview",
+    val city: String = tr("Kolkata · map preview","קולקטה · תצוגה מקדימה של המפה"),
     val selected: Place? = null,
     val route: RoadRoute? = null,
     val progress: RouteProgress? = null,
@@ -86,6 +86,7 @@ class WaypointApplication : Application() {
         super.onCreate()
         // An empty preference store means a fresh install; updates retain the previous store.
         if (appPrefs.all.isEmpty()) appPrefs.edit().putInt("whatsNewShownVersion", BuildConfig.VERSION_CODE).apply()
+        AppLanguage.install(this)
         MapGlyphs.install(this)
         updateAlerts.schedule()
     }
@@ -187,8 +188,8 @@ class NavigationController(private val app: Application, private val repository:
     private var simulationSpeed = 0f
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) = receiveLocation(location)
-        override fun onProviderDisabled(provider: String) { if(provider == LocationManager.GPS_PROVIDER) _state.update{it.copy(gpsReady=false,gpsStatus="Turn on device location")} }
-        override fun onProviderEnabled(provider: String) { _state.update{it.copy(gpsStatus="Finding GPS…")} }
+        override fun onProviderDisabled(provider: String) { if(provider == LocationManager.GPS_PROVIDER) _state.update{it.copy(gpsReady=false,gpsStatus=tr("Turn on device location","הפעילו את שירותי המיקום במכשיר"))} }
+        override fun onProviderEnabled(provider: String) { _state.update{it.copy(gpsStatus=tr("Finding GPS…","מאתרים GPS…"))} }
         @Deprecated("Deprecated in Android") override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) = Unit
     }
     init {
@@ -199,7 +200,7 @@ class NavigationController(private val app: Application, private val repository:
                 // Recover a silent/coarse-only fused stream instead of freezing forever.
                 if(listening && !platformListening && SystemClock.elapsedRealtime()-maxOf(trackingStarted,lastPreciseFixElapsed)>8000) startPlatformLocation()
                 if(listening && !guidance.isAutoDriving() && lastFixElapsed>0 && SystemClock.elapsedRealtime()-lastFixElapsed>15000) {
-                    _state.update{it.copy(gpsReady=false,gpsStatus="GPS signal lost · waiting for a fix",speed=0f,headingReliable=false)}
+                    _state.update{it.copy(gpsReady=false,gpsStatus=tr("GPS signal lost · waiting for a fix","אות ה-GPS אבד · ממתינים למיקום"),speed=0f,headingReliable=false)}
                 }
             }
         }
@@ -230,7 +231,7 @@ class NavigationController(private val app: Application, private val repository:
     fun enableAutoDrive() {
         lastSimulationSampleAt=0L;lastSimulationTraveled=0.0;simulationSpeed=0f
         guidance.enableAutoDrive(_state.value.route)
-        _state.update { it.copy(message="Android Auto test drive is simulating this route.") }
+        _state.update { it.copy(message=tr("Android Auto test drive is simulating this route.","נסיעת המבחן של Android Auto מדמה את המסלול הזה.")) }
     }
     fun leaveCarSession() { guidance.leaveCarSession();lastSimulationSampleAt=0L;simulationSpeed=0f }
     fun handleNavigationIntent(intent: Intent?): Boolean {
@@ -242,7 +243,7 @@ class NavigationController(private val app: Application, private val repository:
         if (shared != null) {
             invalidateImport()
             if (_state.value.navigating) {
-                _state.update { it.copy(message="End your current navigation before opening a shared destination.") }
+                _state.update { it.copy(message=tr("End your current navigation before opening a shared destination.","סיימו את הניווט הנוכחי לפני פתיחת יעד ששותף.")) }
                 return false
             }
             val parsed = NavigationSharing.parseText(shared)
@@ -270,13 +271,13 @@ class NavigationController(private val app: Application, private val repository:
         return offerNavigationImport(proposal)
     }
     private fun sharedImportFailed() {
-        _state.update { it.copy(sharedImportError = true, resolvingSharedDestination = false, message = "Couldn't read this place. Paste an address or search for it below.") }
+        _state.update { it.copy(sharedImportError = true, resolvingSharedDestination = false, message = tr("Couldn't read this place. Paste an address or search for it below.","לא הצלחנו לקרוא את המקום הזה. הדביקו כתובת או חפשו אותו למטה.")) }
     }
     fun dismissSharedImportError() { _state.update { it.copy(sharedImportError = false) } }
     private fun offerNavigationImport(proposal: NavigationImport): Boolean {
         val id = importConsent.offer(proposal, _state.value.navigating)
         if (id == null) {
-            _state.update { it.copy(message="End your current navigation before opening a shared destination.") }
+            _state.update { it.copy(message=tr("End your current navigation before opening a shared destination.","סיימו את הניווט הנוכחי לפני פתיחת יעד ששותף.")) }
             return false
         }
         _state.update { it.copy(pendingSharedDestination=when (proposal) {
@@ -308,8 +309,8 @@ class NavigationController(private val app: Application, private val repository:
                     val chosenName=if(genericLabel)
                         resolved?.name ?: proposal.label else proposal.label
                     select(Place("shared:${proposal.coordinate.lat},${proposal.coordinate.lon}",chosenName,
-                        resolved?.address?.ifBlank { "Coordinates: ${proposal.coordinate.lat}, ${proposal.coordinate.lon}" }
-                            ?: "Coordinates: ${proposal.coordinate.lat}, ${proposal.coordinate.lon}",proposal.coordinate,
+                        resolved?.address?.ifBlank { tr("Coordinates: ${proposal.coordinate.lat}, ${proposal.coordinate.lon}","קואורדינטות: ${proposal.coordinate.lat}, ${proposal.coordinate.lon}") }
+                            ?: tr("Coordinates: ${proposal.coordinate.lat}, ${proposal.coordinate.lon}","קואורדינטות: ${proposal.coordinate.lat}, ${proposal.coordinate.lon}"),proposal.coordinate,
                         source=resolved?.source.orEmpty()))
                 }
             }
@@ -322,11 +323,11 @@ class NavigationController(private val app: Application, private val repository:
                         if (!importGate.canApply(ticket, _state.value.navigating)) return@launch
                         importJob = null
                         if (place != null) select(place)
-                        else _state.update { it.copy(message="Couldn't find the shared destination. Search by address.") }
+                        else _state.update { it.copy(message=tr("Couldn't find the shared destination. Search by address.","לא מצאנו את היעד ששותף. חפשו לפי כתובת.")) }
                     } catch (e: CancellationException) { throw e }
                     catch (_: Exception) {
                         ensureActive()
-                        if (importGate.canApply(ticket, _state.value.navigating)) _state.update { it.copy(message="Couldn't find the shared destination. Search by address.") }
+                        if (importGate.canApply(ticket, _state.value.navigating)) _state.update { it.copy(message=tr("Couldn't find the shared destination. Search by address.","לא מצאנו את היעד ששותף. חפשו לפי כתובת.")) }
                     }
                 }
             }
@@ -349,19 +350,19 @@ class NavigationController(private val app: Application, private val repository:
         prefs.edit().remove("recent").remove("saved").apply()
     }
     fun setVisible(value: Boolean) { visible=value; updateTracking() }
-    fun enableLocation() { enabled=true; prefs.edit().putBoolean("locationEnabled",true).apply(); _state.update{it.copy(gpsStatus="Finding GPS…",cameraRequest=it.cameraRequest+1)}; updateTracking() }
+    fun enableLocation() { enabled=true; prefs.edit().putBoolean("locationEnabled",true).apply(); _state.update{it.copy(gpsStatus=tr("Finding GPS…","מאתרים GPS…"),cameraRequest=it.cameraRequest+1)}; updateTracking() }
     private fun updateTracking() {
         val should = hasLocationPermission() && enabled && (visible || carVisible || _state.value.navigating)
         if(should && !listening) {
             try {
                 listening=true
                 trackingStarted=SystemClock.elapsedRealtime()
-                _state.update{it.copy(gpsStatus="Finding GPS…",sensorDescription=heading.description)}
+                _state.update{it.copy(gpsStatus=tr("Finding GPS…","מאתרים GPS…"),sensorDescription=heading.description)}
                 headingArbiter.reset()
                 heading.start()
                 manager.registerGnssStatusCallback(gnssCallback,Handler(app.mainLooper))
                 if(GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(app)==ConnectionResult.SUCCESS) {
-                    _state.update{it.copy(locationProvider="Fused location · GNSS / Wi-Fi / cell")}
+                    _state.update{it.copy(locationProvider=tr("Fused location · GNSS / Wi-Fi / cell","מיקום משולב · GNSS / Wi-Fi / סלולרי"))}
                     val request=LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY,1000L)
                         .setMinUpdateIntervalMillis(500L).setMaxUpdateDelayMillis(0L)
                         .setWaitForAccurateLocation(false).build()
@@ -369,7 +370,7 @@ class NavigationController(private val app: Application, private val repository:
                         .addOnSuccessListener{if(!listening)fused.removeLocationUpdates(fusedCallback)}
                         .addOnFailureListener{if(listening)startPlatformLocation()}
                 } else startPlatformLocation()
-                if(!androidx.core.location.LocationManagerCompat.isLocationEnabled(manager)) _state.update{it.copy(gpsReady=false,gpsStatus="Turn on device location")}
+                if(!androidx.core.location.LocationManagerCompat.isLocationEnabled(manager)) _state.update{it.copy(gpsReady=false,gpsStatus=tr("Turn on device location","הפעילו את שירותי המיקום במכשיר"))}
             } catch (_: SecurityException) { stopTracking();permissionDenied() }
         } else if(!should && listening) {
             stopTracking()
@@ -386,7 +387,7 @@ class NavigationController(private val app: Application, private val repository:
             for(provider in listOf(LocationManager.GPS_PROVIDER,LocationManager.NETWORK_PROVIDER)) {
                 if(manager.allProviders.contains(provider)) manager.requestLocationUpdates(provider,1000L,1f,locationListener,app.mainLooper)
             }
-            _state.update{it.copy(locationProvider="Android GNSS + network fallback")}
+            _state.update{it.copy(locationProvider=tr("Android GNSS + network fallback","GNSS של Android + גיבוי מהרשת"))}
         } catch(_:SecurityException){stopTracking();permissionDenied()}
     }
     private fun stopTracking() {
@@ -397,7 +398,7 @@ class NavigationController(private val app: Application, private val repository:
         manager.unregisterGnssStatusCallback(gnssCallback)
         heading.stop()
     }
-    fun permissionDenied() { userFocusPending=false;_state.update{it.copy(gpsReady=false,gpsStatus="Precise location required",message="Allow precise location in Android settings to navigate.")} }
+    fun permissionDenied() { userFocusPending=false;_state.update{it.copy(gpsReady=false,gpsStatus=tr("Precise location required","נדרש מיקום מדויק"),message=tr("Allow precise location in Android settings to navigate.","כדי לנווט, אפשרו מיקום מדויק בהגדרות Android."))} }
     private fun onFerrostarState(state: NavigationState) {
         val active=state.tripState
         if(active is TripState.Complete && _state.value.navigating) {
@@ -423,9 +424,9 @@ class NavigationController(private val app: Application, private val repository:
         }
         val p=active.progress
         val cue=active.visualInstruction?.primaryContent?.text?.takeIf { it.isNotBlank() }
-            ?: route.steps.getOrNull(nextIndex)?.instruction ?: "Continue on your route"
+            ?: route.steps.getOrNull(nextIndex)?.instruction ?: tr("Continue on your route","המשיכו במסלול")
         val guidanceText=if(route.steps.getOrNull(nextIndex)?.type=="arrive" && p.distanceToNextManeuver>150)
-            active.remainingSteps.firstOrNull()?.roadName?.takeIf { it.isNotBlank() }?.let { "Continue on $it" } ?: "Continue toward your destination"
+            active.remainingSteps.firstOrNull()?.roadName?.takeIf { it.isNotBlank() }?.let { tr("Continue on $it","המשיכו לאורך $it") } ?: tr("Continue toward your destination","המשיכו לכיוון היעד")
             else cue
         val offRoute=active.deviation is RouteDeviation.Deviation
         val progress=RouteProgress(
@@ -456,7 +457,7 @@ class NavigationController(private val app: Application, private val repository:
         _state.update { if(it.navigating)it.copy(progress=progress,offRoute=offRoute,routing=state.isCalculatingNewRoute,
             fix=if(guidance.isAutoDriving()) snapped else it.fix,
             gpsReady=if(guidance.isAutoDriving()) true else it.gpsReady,
-            gpsStatus=if(guidance.isAutoDriving()) "Simulated drive" else it.gpsStatus,
+            gpsStatus=if(guidance.isAutoDriving()) tr("Simulated drive","נסיעה מדומה") else it.gpsStatus,
             speed=if(guidance.isAutoDriving()) simulationSpeed else it.speed) else it }
     }
     private fun onFerrostarAlternateRoute(route: RoadRoute, destination: Coordinate) {
@@ -492,9 +493,9 @@ class NavigationController(private val app: Application, private val repository:
         _state.update{
             val nextCameraRequest=it.cameraRequest+if(first || focusUserNow) 1 else 0
             it.copy(fix=fix,accuracy=location.accuracy,gpsReady=reliable,
-            gpsStatus=if(reliable) "GPS connected" else "Improving GPS accuracy…",
+            gpsStatus=if(reliable) tr("GPS connected","GPS מחובר") else tr("Improving GPS accuracy…","משפרים את דיוק ה-GPS…"),
             speed=speed,
-            city=if(first)"Current area" else it.city,
+            city=if(first)tr("Current area","האזור הנוכחי") else it.city,
             cameraRequest=nextCameraRequest,
             focusUserCameraRequest=if(focusUserNow) nextCameraRequest else it.focusUserCameraRequest)
         }
@@ -506,9 +507,9 @@ class NavigationController(private val app: Application, private val repository:
             fixReliable=reliable,mode=_state.value.mode,now=now))
         if(reliable && _state.value.pendingSharedDestination==null && !cityLookupPending && now-lastCityAttempt>=60000 && (cityPoint==null || distance(cityPoint!!,fix)>5000)) {
             cityLookupPending=true;lastCityAttempt=now
-            _state.update{it.copy(city="Current area")}
+            _state.update{it.copy(city=tr("Current area","האזור הנוכחי"))}
             scope.launch {
-                try { val label=repository.reverse(fix);cityPoint=fix;_state.update{it.copy(city=label.ifBlank{"Current area"})} }
+                try { val label=repository.reverse(fix);cityPoint=fix;_state.update{it.copy(city=label.ifBlank{tr("Current area","האזור הנוכחי")})} }
                 catch(_: Exception) { /* Keep the geographic-neutral label; a later fix retries. */ }
                 finally { cityLookupPending=false }
             }
@@ -522,7 +523,7 @@ class NavigationController(private val app: Application, private val repository:
     }
     fun select(place: Place) {
         invalidateImport()
-        if (!place.point.isValid()) { _state.update { it.copy(message="That destination has invalid coordinates. Choose another place.") }; return }
+        if (!place.point.isValid()) { _state.update { it.copy(message=tr("That destination has invalid coordinates. Choose another place.","ליעד הזה יש קואורדינטות שגויות. בחרו מקום אחר.")) }; return }
         destinationActionVersion++
         stopNavigation(clear=false)
         _state.update{it.copy(selected=place,route=null,progress=null,routeError=null,arrived=false,cameraRequest=it.cameraRequest+1)}
@@ -532,7 +533,7 @@ class NavigationController(private val app: Application, private val repository:
     fun requestRoute(reroute: Boolean = false) {
         val s = _state.value; val origin = s.fix ?: return; val target = s.selected ?: return
         if(s.pendingSharedDestination!=null)return
-        if(!s.gpsReady) { _state.update{it.copy(message="Waiting for an accurate GPS fix.")}; return }
+        if(!s.gpsReady) { _state.update{it.copy(message=tr("Waiting for an accurate GPS fix.","ממתינים למיקום GPS מדויק."))}; return }
         routeJob?.cancel()
         val generation=++routeGeneration
         // A preview route belongs to the origin where it was calculated. If the
@@ -556,28 +557,28 @@ class NavigationController(private val app: Application, private val repository:
                 routeOrigin=origin
                 _state.update{it.copy(route=route,progress=null,routing=false,offRoute=false,routeError=null,cameraRequest=it.cameraRequest+if(reroute) 0 else 1)}
             } catch(e: CancellationException) { throw e }
-            catch(e: Exception) { ensureActive(); _state.update{it.copy(routing=false,routeError=e.message ?: "Couldn't load the route. Check your connection.")} }
+            catch(e: Exception) { ensureActive(); _state.update{it.copy(routing=false,routeError=e.message ?: tr("Couldn't load the route. Check your connection.","לא הצלחנו לטעון את המסלול. בדקו את החיבור לאינטרנט."))} }
         }
     }
     fun startNavigation() {
         invalidateImport()
         val s = _state.value
-        if(!s.gpsReady || s.fix==null || !hasLocationPermission()) { _state.update{it.copy(message="Enable precise GPS and wait for a location fix.")}; return }
+        if(!s.gpsReady || s.fix==null || !hasLocationPermission()) { _state.update{it.copy(message=tr("Enable precise GPS and wait for a location fix.","הפעילו GPS מדויק והמתינו לאיתור המיקום."))}; return }
         if(s.route==null || s.routing || s.route.mode!=s.mode) return
-        if((routeOrigin?.let{distance(it,s.fix)} ?: 0.0)>100.0) { requestRoute(); _state.update{it.copy(message="Updating the route from your current position. Start when it's ready.")}; return }
+        if((routeOrigin?.let{distance(it,s.fix)} ?: 0.0)>100.0) { requestRoute(); _state.update{it.copy(message=tr("Updating the route from your current position. Start when it's ready.","מעדכנים את המסלול מהמיקום הנוכחי. התחילו כשהוא מוכן."))}; return }
         if(s.routeError!=null) { requestRoute(); return }
-        if(s.route.ferrostarRoute==null) { _state.update{it.copy(message="Ferrostar could not read this route. Try another destination.")};return }
+        if(s.route.ferrostarRoute==null) { _state.update{it.copy(message=tr("Ferrostar could not read this route. Try another destination.","Ferrostar לא הצליח לקרוא את המסלול. נסו יעד אחר."))};return }
         val destination=s.selected?.point ?: return
         navigationSessions.begin()
         _state.update{it.copy(navigating=true,arrived=false,offRoute=false,progress=null,cameraRequest=it.cameraRequest+1)}
         try { ContextCompat.startForegroundService(app,Intent(app,NavigationService::class.java)) }
-        catch(error: Exception) { navigationSessions.end();android.util.Log.e("WaypointNav","Foreground service failed",error);_state.update{it.copy(navigating=false,message="Android couldn't start navigation. Keep the app open and try again.")}; return }
+        catch(error: Exception) { navigationSessions.end();android.util.Log.e("WaypointNav","Foreground service failed",error);_state.update{it.copy(navigating=false,message=tr("Android couldn't start navigation. Keep the app open and try again.","Android לא הצליח להתחיל את הניווט. השאירו את האפליקציה פתוחה ונסו שוב."))}; return }
         try { guidance.start(s.route,lastAcceptedLocation,s.voice,destination) }
         catch(error: Exception) {
             navigationSessions.end()
             runCatching { guidance.stop() }
             android.util.Log.e("WaypointNav","Ferrostar guidance failed",error)
-            _state.update{it.copy(navigating=false,message="Couldn't start guidance. Try this route again.")}
+            _state.update{it.copy(navigating=false,message=tr("Couldn't start guidance. Try this route again.","לא הצלחנו להתחיל את ההנחיות. נסו את המסלול שוב."))}
             app.stopService(Intent(app,NavigationService::class.java));return
         }
         s.selected.let { place ->
@@ -608,14 +609,14 @@ class NavigationController(private val app: Application, private val repository:
         navigationSessions.end()
         if(_state.value.navigating) {
             guidance.stop()
-            _state.update{it.copy(navigating=false,message="Navigation stopped.")}
+            _state.update{it.copy(navigating=false,message=tr("Navigation stopped.","הניווט הופסק."))}
             updateTracking()
         }
     }
     fun search(query: String) {
         if (query.trim().startsWith("https:") || query.trim().startsWith("geo:")) {
             searchJob?.cancel()
-            _state.update { it.copy(query=query.take(4096), searching=false, searchResults=emptyList(), searchError=null, searchNote="Tap Search places to open this shared location.") }
+            _state.update { it.copy(query=query.take(4096), searching=false, searchResults=emptyList(), searchError=null, searchNote=tr("Tap Search places to open this shared location.","הקישו על „חיפוש מקומות” כדי לפתוח את המיקום ששותף.")) }
         } else searchPlaces(query,false)
     }
     fun submitSearch() {
@@ -639,7 +640,7 @@ class NavigationController(private val app: Application, private val repository:
                     },searchNote=result.note,searching=false)
                 }
             } catch(e: CancellationException) { throw e }
-            catch(e: Exception) { ensureActive(); _state.update{it.copy(searching=false,searchError=e.message ?: "Search unavailable. Try again.")} }
+            catch(e: Exception) { ensureActive(); _state.update{it.copy(searching=false,searchError=e.message ?: tr("Search unavailable. Try again.","החיפוש אינו זמין. נסו שוב."))} }
         }
     }
     fun changeMode(mode:TravelMode) {

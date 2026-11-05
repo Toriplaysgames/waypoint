@@ -42,13 +42,13 @@ internal class WaypointCarOverlay(private val context: Context) {
         canvas.drawRect(left,top,right,top+4f*scale,paint)
         paint.typeface=face(state.world.readingTypeface().bold)
         paint.textSize=16f*scale
-        canvas.drawText(state.progress?.let { formatDistance(it.toTurn,state.imperial) } ?: "Ahead",
+        canvas.drawText(state.progress?.let { formatDistance(it.toTurn,state.imperial) } ?: tr("Ahead","קדימה"),
             left+70f*scale,top+30f*scale,paint)
         val maneuver=state.route?.steps?.getOrNull(state.progress?.nextStep ?: 0)
         drawTurnArrow(canvas,maneuver,left+31f*scale,top+59f*scale,scale,palette.accent.toArgb())
         val cue=when {
             !state.gpsReady -> state.gpsStatus
-            state.offRoute -> "Finding a new route"
+            state.offRoute -> tr("Finding a new route","מחפשים מסלול חדש")
             else -> routeGuidance(state.route,state.progress).instruction
         }
         cuePaint.color=palette.foreground.toArgb()
@@ -142,7 +142,7 @@ internal class WaypointCarOverlay(private val context: Context) {
     }
 
     private fun drawMapCredit(canvas: Canvas,scale: Float) {
-        val label="Map data: OpenStreetMap"
+        val label=tr("Map data: OpenStreetMap","נתוני מפה: OpenStreetMap")
         paint.style=Paint.Style.FILL
         paint.typeface=Typeface.DEFAULT
         paint.textSize=11f*scale

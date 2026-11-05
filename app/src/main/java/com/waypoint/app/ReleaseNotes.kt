@@ -55,14 +55,14 @@ fun WhatsNewDialog(notes: String, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Panel,
-        title = { Text("What’s new in Waypoint") },
+        title = { Text(tr("What’s new in Waypoint","מה חדש ב-Waypoint")) },
         text = {
             ReleaseNotesContent(
                 notes,
                 Modifier.fillMaxWidth().heightIn(max = 360.dp).verticalScroll(rememberScrollState()),
             )
         },
-        confirmButton = { TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) { Text("Explore map") } },
-        dismissButton = { TextButton(onClick = { uri.openUri(ReleaseUpdate.PAGE) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("GitHub release") } },
+        confirmButton = { TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) { Text(tr("Explore map","לגלות את המפה")) } },
+        dismissButton = { TextButton(onClick = { uri.openUri(ReleaseUpdate.PAGE) }, modifier = Modifier.heightIn(min = 48.dp)) { Text(tr("GitHub release","הגרסה ב-GitHub")) } },
     )
 }

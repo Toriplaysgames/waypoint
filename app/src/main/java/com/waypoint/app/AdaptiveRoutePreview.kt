@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.sp
     Column(modifier.padding(12.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
         Surface(color=palette.panel,contentColor=palette.foreground,shape=hudShape(state.world)) {
             Row(Modifier.fillMaxWidth().heightIn(min=56.dp),verticalAlignment=Alignment.CenterVertically) {
-                IconButton(onClick=onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack,"Close route preview") }
-                Text("Route",fontFamily=worldFont(state.world),style=MaterialTheme.typography.titleLarge,modifier=Modifier.weight(1f))
-                IconButton(onClick=onSettings) { Icon(Icons.Default.Tune,"Settings") }
+                IconButton(onClick=onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack,tr("Close route preview","סגירת התצוגה המקדימה של המסלול")) }
+                Text(tr("Route","מסלול"),fontFamily=worldFont(state.world),style=MaterialTheme.typography.titleLarge,modifier=Modifier.weight(1f))
+                IconButton(onClick=onSettings) { Icon(Icons.Default.Tune,tr("Settings","הגדרות")) }
             }
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(12.dp)) {
@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.sp
                     TextButton(onClick=onLocate,modifier=Modifier.heightIn(min=48.dp)) {
                         Icon(Icons.Default.MyLocation,null,tint=palette.foreground)
                         Spacer(Modifier.width(8.dp))
-                        Text("Use my location",color=palette.foreground)
+                        Text(tr("Use my location","שימוש במיקום שלי"),color=palette.foreground)
                     }
                 }
             }
@@ -56,13 +56,13 @@ import androidx.compose.ui.unit.sp
     var more by remember { mutableStateOf(false) }
     @Composable fun Save() {
         TextButton(onClick=onSave,contentPadding=if(expanded)PaddingValues(horizontal=12.dp,vertical=8.dp) else PaddingValues(2.dp),
-            modifier=(if(expanded)Modifier else Modifier.width(64.dp)).heightIn(min=56.dp).semantics { contentDescription="Save place" }) {
+            modifier=(if(expanded)Modifier else Modifier.width(64.dp)).heightIn(min=56.dp).semantics { contentDescription=tr("Save place","שמירת המקום") }) {
             if(expanded) {
                 Icon(if(saved)Icons.Default.Bookmark else Icons.Default.BookmarkBorder,null,tint=palette.accent)
-                Spacer(Modifier.width(8.dp));Text(if(saved)"Saved" else "Save",color=palette.accent)
+                Spacer(Modifier.width(8.dp));Text(if(saved)tr("Saved","שמורים") else tr("Save","שמירה"),color=palette.accent)
             } else Column(horizontalAlignment=Alignment.CenterHorizontally) {
                 Icon(if(saved)Icons.Default.Bookmark else Icons.Default.BookmarkBorder,null,tint=palette.accent)
-                Text(if(saved)"Saved" else "Save",fontFamily=hudFont(state.world),fontSize=12.sp,lineHeight=16.sp,letterSpacing=0.sp,maxLines=1,softWrap=false,color=palette.accent)
+                Text(if(saved)tr("Saved","שמורים") else tr("Save","שמירה"),fontFamily=hudFont(state.world),fontSize=12.sp,lineHeight=16.sp,letterSpacing=0.sp,maxLines=1,softWrap=false,color=palette.accent)
             }
         }
     }
@@ -71,14 +71,14 @@ import androidx.compose.ui.unit.sp
             TextButton(onClick={more=true},contentPadding=if(expanded)PaddingValues(horizontal=12.dp,vertical=8.dp) else PaddingValues(2.dp),
                 modifier=(if(expanded)Modifier else Modifier.width(48.dp)).heightIn(min=56.dp)) {
                 if(expanded) {
-                    Icon(Icons.Default.MoreVert,null,tint=palette.accent);Spacer(Modifier.width(8.dp));Text("More",color=palette.accent)
+                    Icon(Icons.Default.MoreVert,null,tint=palette.accent);Spacer(Modifier.width(8.dp));Text(tr("More","עוד"),color=palette.accent)
                 } else Column(horizontalAlignment=Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.MoreVert,null,tint=palette.accent);Text("More",fontSize=12.sp,color=palette.accent)
+                    Icon(Icons.Default.MoreVert,null,tint=palette.accent);Text(tr("More","עוד"),fontSize=12.sp,color=palette.accent)
                 }
             }
             DropdownMenu(expanded=more,onDismissRequest={more=false}) {
-                onQuest?.let { DropdownMenuItem(text={Text("Add a quest here")},onClick={more=false;it()},leadingIcon={Icon(Icons.Default.Assignment,null)}) }
-                onShare?.let { DropdownMenuItem(text={Text("Open in another map app")},onClick={more=false;it()},leadingIcon={Icon(Icons.Default.OpenInNew,null)}) }
+                onQuest?.let { DropdownMenuItem(text={Text(tr("Add a quest here","הוספת משימה כאן"))},onClick={more=false;it()},leadingIcon={Icon(Icons.Default.Assignment,null)}) }
+                onShare?.let { DropdownMenuItem(text={Text(tr("Open in another map app","פתיחה באפליקציית מפות אחרת"))},onClick={more=false;it()},leadingIcon={Icon(Icons.Default.OpenInNew,null)}) }
             }
         }
     }

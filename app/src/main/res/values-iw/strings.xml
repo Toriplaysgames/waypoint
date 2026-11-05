@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_game">המשחק האהוב עליך</string>
+    <string name="intro_find_game">מצאו את המשחק האהוב עליכם והחילו את הסגנון שלו על המפה האמיתית שלכם!</string>
+    <string name="intro_real_streets">רחובות אמיתיים שמרגישים כמו המפות מהמשחקים האהובים עליכם.</string>
+    <string name="favorite_games_question">מה המשחקים\nהאהובים עליך?</string>
+    <string name="choose_multiple_games">אפשר לבחור כמה שרוצים</string>
+    <string name="welcome_worlds_description">מקומות אמיתיים פוגשים את המפות, הצבעים והאווירה של המשחקים שלכם.</string>
+    <string name="favorites_hint">בחרו כמה שתרצו. יהיה קל יותר למצוא את המועדפים.</string>
+    <string name="recenter">מרכוז</string>
+    <string name="heading_recenter">כיוון %1$d מעלות; הקישו למרכוז</string>
+    <string name="heading_unavailable_recenter">הכיוון אינו זמין; הקישו למרכוז</string>
+    <string name="metric_units">קילומטרים ומטרים</string>
+    <string name="map_data_licenses">נתוני מפה ורישיונות</string>
+    <string name="license_sources">מקורות ומידע על רישיונות</string>
+    <string name="map_credits">סגנון וסכמה: OpenMapTiles. הקרדיטים המלאים וקישורי הרישיונות נמצאים בהגדרות Waypoint בטלפון.</string>
+    <string name="world_los_santos_description">רחובות במונוכרום, מסלולים סגולים ומכ״ם בעל שלושת הפסים.</string>
+    <string name="world_old_west_description">דרכי קלף, מסלולים בארגמן ופקדים עגולים.</string>
+    <string name="world_night_city_description">רחובות ציאן, בניינים אדומים ולוחות ניווט זוויתיים.</string>
+    <string name="world_pixel_description">כיתוב פיקסלים, פקדים בסגנון תיק ציוד ורחובות בנויים מקוביות.</string>
+    <string name="world_green_terminal_description">קרטוגרפיה זרחנית, כיתוב מסוף ולשוניות בסגנון Pip-Boy.</string>
+    <string name="world_san_andreas_description">אטלס רחובות דהוי בשמש בהשראת הקלאסיקות.</string>
+    <string name="world_heat_description">אטלס מירוצים מפורט עם מים כחולים והנחיות חשמליות.</string>
+    <string name="world_rivia_description">האטלס של The Witcher 3: דרכים בדיו, שטח בגוון קלף והנחיות באדום.</string>
+    <string name="world_vice_coast_description">הכיתוב הוורוד של Vice City, דרכים חיוורות וירוק של חוף.</string>
+    <string name="world_liberty_description">אטלס הגרפיט של GTA IV, רחובות אפורים והנחיות בענבר.</string>
+    <string name="world_ctos_description">אטלס הרחובות המואר של Watch Dogs 2 וסמני מקום בהירים.</string>
+    <string name="world_hyrule_description">הלוח הכחול של Breath of the Wild, נגיעות זהב ותבליט שטח.</string>
+    <string name="world_skyrim_description">תבליט קר, סמלים בכסף והממשק המאופק של Elder Scrolls.</string>
+    <string name="world_lands_between_description">האטלס העתיק של Elden Ring, סמנים בזהב ותבליט בגווני אדמה.</string>
+    <string name="world_horizon_description">אטלס הכבישים העז של Forza, פקדים ורודים ותבליט שטח.</string>
+    <string name="world_assassin_description">קרטוגרפיה מדברית, הנחיות בזהב ולוחות אטלס מאופקים.</string>
+    <string name="world_far_cry_description">תבליט שטח ירוק, דרכים חיוורות וממשק חקירה ברור.</string>
+    <string name="world_ghost_description">שטח בדיו מדוללת, אדמה לבנה כנייר והנחיות בארגמן.</string>
+    <string name="world_bridges_description">שטח קר, סימוני נתונים בציאן וממשק מסלול בכחול־אפור.</string>
+    <string name="world_horizon_wilds_description">שטח יער כהה, תבליט ופקדי אטלס עדינים בשנהב.</string>
+    <string name="world_spider_description">גושי עיר בתלת־ממד בטורקיז, קווי רחוב כחולים ונגיעות אדומות בממשק.</string>
+    <string name="world_hogwarts_description">תבליט ירוק עמום, מסגרות מוזהבות וממשק אטלס בכחול חצות.</string>
+    <string name="world_starfield_description">קרטוגרפיה בכחול עמוק, סימוני מיקום בהירים וקריאות מדויקות.</string>
+    <string name="world_kingdom_description">צבעי אטלס ימי־ביניימיים חמים, תבליט יערות ומסלולים מוזהבים.</string>
+    <string name="world_saints_description">גושי עיר כהים, בחירות בסגול ומסלולי GPS בהירים.</string>
+    <string name="world_just_cause_description">שטח בכחול כהה, קווי חוף בטורקיז ופקדי מפה טקטית נקיים.</string>
+    <string name="world_mafia_description">צבעי אטלס רחובות של שנות ה-30, דרכים מוזהבות וטיפוגרפיה שקטה בשמנת.</string>
+    <plurals name="games_selected">
+        <item quantity="one">נבחר %d</item>
+        <item quantity="two">נבחרו %d</item>
+        <item quantity="many">נבחרו %d</item>
+        <item quantity="other">נבחרו %d</item>
+    </plurals>
+    <string name="game_selected">נבחר</string>
+    <string name="find_in_waypoint">חיפוש ב-Waypoint</string>
+    <string name="game_not_selected">לא נבחר</string>
+</resources>

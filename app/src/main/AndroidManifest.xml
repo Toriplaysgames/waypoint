@@ -19,7 +19,7 @@
         <package android:name="com.google.android.apps.maps" />
         <package android:name="com.google.android.projection.gearhead" />
     </queries>
-    <application android:name=".WaypointApplication" android:label="Waypoint" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:theme="@style/AppTheme" android:allowBackup="false" android:dataExtractionRules="@xml/data_extraction_rules" android:supportsRtl="true" android:usesCleartextTraffic="false">
+    <application android:name=".WaypointApplication" android:label="Waypoint" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:theme="@style/AppTheme" android:allowBackup="false" android:dataExtractionRules="@xml/data_extraction_rules" android:supportsRtl="true" android:localeConfig="@xml/locales_config" android:usesCleartextTraffic="false">
         <meta-data android:name="androidx.car.app.minCarApiLevel" android:value="2" />
         <meta-data android:name="com.google.android.gms.car.application" android:resource="@xml/automotive_app_desc" />
         <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:windowSoftInputMode="adjustResize" android:enableOnBackInvokedCallback="true">
@@ -29,7 +29,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
-            <intent-filter android:label="Find in Waypoint">
+            <intent-filter android:label="@string/find_in_waypoint">
                 <action android:name="android.intent.action.PROCESS_TEXT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />

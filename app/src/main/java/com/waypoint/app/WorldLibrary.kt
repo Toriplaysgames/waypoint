@@ -47,10 +47,10 @@ import androidx.compose.ui.unit.dp
     if (preview != null) {
         BackHandler { previewName = null }
         QuestTheme(preview, adaptSystemBars = true) {
-            Scaffold(topBar = { TopAppBar(title = { Text("World preview") }, navigationIcon = { IconButton(onClick = { previewName = null }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back to worlds") } },
+            Scaffold(topBar = { TopAppBar(title = { Text(tr("World preview","תצוגה מקדימה של העולם")) }, navigationIcon = { IconButton(onClick = { previewName = null }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, tr("Back to worlds","חזרה לעולמות")) } },
                 actions = { FavoriteWorldButton(preview, preview.name in favorites) { favorite(preview) } }) },
                 bottomBar = { Surface { Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                    Button(onClick = { previewName = null; onSelect(preview) }, modifier = Modifier.widthIn(max = 680.dp).fillMaxWidth().heightIn(min = 52.dp), shape = hudShape(preview)) { Text("Use this world") }
+                    Button(onClick = { previewName = null; onSelect(preview) }, modifier = Modifier.widthIn(max = 680.dp).fillMaxWidth().heightIn(min = 52.dp), shape = hudShape(preview)) { Text(tr("Use this world","שימוש בעולם הזה")) }
                 } } }) { padding ->
                 Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
                     Column(Modifier.widthIn(max = 760.dp).fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -59,10 +59,10 @@ import androidx.compose.ui.unit.dp
                             Text(preview.title, style = MaterialTheme.typography.headlineMedium)
                             Text(preview.inspiration(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                             Text(stringResource(preview.descriptionRes), style = MaterialTheme.typography.bodyLarge)
-                            Text("Preview: ${preview.previewPlace().label}", style = MaterialTheme.typography.bodySmall)
+                            Text(tr("Preview: ${preview.previewPlace().label}","תצוגה מקדימה: ${preview.previewPlace().label}"), style = MaterialTheme.typography.bodySmall)
                             HorizontalDivider()
-                            Text("Your places, quests and progress stay with you.", style = MaterialTheme.typography.bodyMedium)
-                            Text("Maps © OpenFreeMap · OpenMapTiles · OpenStreetMap contributors", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(tr("Your places, quests and progress stay with you.","המקומות, המשימות וההתקדמות שלך נשארים איתך."), style = MaterialTheme.typography.bodyMedium)
+                            Text(tr("Maps © OpenFreeMap · OpenMapTiles · OpenStreetMap contributors","מפות © OpenFreeMap · OpenMapTiles · התורמים ל-OpenStreetMap"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Spacer(Modifier.height(24.dp))
                         }
                     }
@@ -77,29 +77,29 @@ import androidx.compose.ui.unit.dp
         else -> true
     } }
     Scaffold( containerColor = Ink, topBar = {
-        TopAppBar(title = { Text("Worlds") }, navigationIcon = { IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Return to map") } })
+        TopAppBar(title = { Text(tr("Worlds","עולמות")) }, navigationIcon = { IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, tr("Return to map","חזרה למפה")) } })
     }) { padding ->
         Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
             LazyColumn(Modifier.widthIn(max = 760.dp).fillMaxSize(), state=listState, contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("Find your next world", style = MaterialTheme.typography.headlineMedium)
-                        Text("${World.entries.size} worlds. Every one included. Preview a world, then make it yours.", color = Muted)
-                        OutlinedTextField(query, onValueChange = { query = it.take(100) }, label = { Text("Find a world or game") }, leadingIcon = { Icon(Icons.Default.Search, null) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                        Text(tr("Find your next world","מצאו את העולם הבא שלך"), style = MaterialTheme.typography.headlineMedium)
+                        Text(tr("${World.entries.size} worlds. Every one included. Preview a world, then make it yours.","${World.entries.size} עולמות, כולם כלולים. הציצו בעולם ואז הפכו אותו לשלכם."), color = Muted)
+                        OutlinedTextField(query, onValueChange = { query = it.take(100) }, label = { Text(tr("Find a world or game","חיפוש עולם או משחק")) }, leadingIcon = { Icon(Icons.Default.Search, null) }, singleLine = true, modifier = Modifier.fillMaxWidth())
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf("All", "Favourites", "New").forEach { name -> FilterChip(selected = filter == name, onClick = { filter = name }, label = { Text(name) }) }
+                            listOf("All", "Favourites", "New").forEach { name -> FilterChip(selected = filter == name, onClick = { filter = name }, label = { Text(when (name) { "All" -> tr("All", "הכול"); "Favourites" -> tr("Favourites", "מועדפים"); else -> tr("New", "חדשים") }) }) }
                         }
                     }
                 }
                 if (worlds.isEmpty()) item {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(if (filter == "Favourites" && query.isBlank()) "Keep your favourites close" else "No worlds found", style = MaterialTheme.typography.titleLarge)
-                        Text(if (filter == "Favourites" && query.isBlank()) "Tap a heart on any world to find it here." else "Try a different name or browse all worlds.", color = Muted)
-                        TextButton(onClick = { filter = "All"; query = "" }) { Text("Browse all worlds") }
+                        Text(if (filter == "Favourites" && query.isBlank()) tr("Keep your favourites close","המועדפים שלך, תמיד בהישג יד") else tr("No worlds found","לא נמצאו עולמות"), style = MaterialTheme.typography.titleLarge)
+                        Text(if (filter == "Favourites" && query.isBlank()) tr("Tap a heart on any world to find it here.","הקישו על הלב בעולם כלשהו כדי למצוא אותו כאן.") else tr("Try a different name or browse all worlds.","נסו שם אחר או עיינו בכל העולמות."), color = Muted)
+                        TextButton(onClick = { filter = "All"; query = "" }) { Text(tr("Browse all worlds","עיון בכל העולמות")) }
                     }
                 }
                 items(worlds, key = { it.name }) { world ->
-                    Surface(onClick = { previewName = world.name }, modifier = Modifier.semantics { contentDescription = "Preview ${world.title} theme" },
+                    Surface(onClick = { previewName = world.name }, modifier = Modifier.semantics { contentDescription = tr("Preview ${world.title} theme","תצוגה מקדימה של העיצוב ${world.title}") },
                         color = Panel, shape = RoundedCornerShape(12.dp), border = if (selected == world) BorderStroke(2.dp, world.accent) else null) {
                         Column {
                             Box {
@@ -108,21 +108,21 @@ import androidx.compose.ui.unit.dp
                                     FavoriteWorldButton(world, world.name in favorites) { favorite(world) }
                                 }
                                 if (selected == world || world in newWorlds) Surface(color = Ink, shape = RoundedCornerShape(4.dp), modifier = Modifier.align(Alignment.BottomStart).padding(12.dp)) {
-                                    Text(if (selected == world) "Current world" else "New", color = Cream, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
+                                    Text(if (selected == world) tr("Current world", "העולם הנוכחי") else tr("New", "חדש"), color = Cream, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
                                 }
                             }
                             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                                     Text(world.title, fontFamily = worldFont(world), style = MaterialTheme.typography.titleLarge, color = Cream)
                                     Text(world.inspiration(), style = MaterialTheme.typography.bodySmall, color = Muted)
-                                    Text("Preview world", style = MaterialTheme.typography.labelLarge, color = world.accent, fontWeight = FontWeight.SemiBold)
+                                    Text(tr("Preview world","תצוגה מקדימה"), style = MaterialTheme.typography.labelLarge, color = world.accent, fontWeight = FontWeight.SemiBold)
                                 }
                                 Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = Cream)
                             }
                         }
                     }
                 }
-                item { Text("Maps © OpenFreeMap · OpenMapTiles · OpenStreetMap contributors", style = MaterialTheme.typography.bodySmall, color = Muted) }
+                item { Text(tr("Maps © OpenFreeMap · OpenMapTiles · OpenStreetMap contributors","מפות © OpenFreeMap · OpenMapTiles · התורמים ל-OpenStreetMap"), style = MaterialTheme.typography.bodySmall, color = Muted) }
             }
         }
     }
@@ -131,7 +131,7 @@ import androidx.compose.ui.unit.dp
 @Composable private fun FavoriteWorldButton(world: World, favorite: Boolean, onClick: () -> Unit) {
     IconToggleButton(checked = favorite, onCheckedChange = { onClick() }) {
         Icon(if (favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-            if (favorite) "Remove ${world.title} from favourites" else "Add ${world.title} to favourites")
+            if (favorite) tr("Remove ${world.title} from favourites","הסרת ${world.title} מהמועדפים") else tr("Add ${world.title} to favourites","הוספת ${world.title} למועדפים"))
     }
 }
 

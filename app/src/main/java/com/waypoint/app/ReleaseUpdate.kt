@@ -17,25 +17,25 @@ data class ReleaseUpdate(val version: String, val versionCode: Int, val url: Str
             return major.toInt() * 1_000_000 + minor.toInt() * 1_000 + patch.toInt()
         }
         fun parse(json: String, installedCode: Int): ReleaseUpdate? {
-            require(json.length <= 1_000_000) { "The release response is too large." }
+            require(json.length <= 1_000_000) { tr("The release response is too large.","התשובה על הגרסה גדולה מדי.") }
             JsonSafety.checkDepth(json)
             val release = JSONObject(json)
             if (release.optBoolean("draft") || release.optBoolean("prerelease")) return null
             val tag = release.getString("tag_name")
-            require(tag.startsWith("v")) { "The release has an unsupported version tag." }
+            require(tag.startsWith("v")) { tr("The release has an unsupported version tag.","לגרסה יש תגית גרסה שאינה נתמכת.") }
             val version = tag.drop(1)
-            val code = requireNotNull(versionCode(version)) { "The release has an unsupported version." }
+            val code = requireNotNull(versionCode(version)) { tr("The release has an unsupported version.","הגרסה אינה נתמכת.") }
             if (code <= installedCode) return null
             val assets = release.getJSONArray("assets")
             val matches = (0 until assets.length()).map { assets.getJSONObject(it) }.filter { it.optString("name") == "Waypoint.apk" && it.optString("state") == "uploaded" }
-            require(matches.size == 1) { "The latest release does not have a ready Android download yet. Try again shortly." }
+            require(matches.size == 1) { tr("The latest release does not have a ready Android download yet. Try again shortly.","לגרסה האחרונה עדיין אין קובץ Android מוכן להורדה. נסו שוב בקרוב.") }
             val asset = matches.single()
             val url = asset.getString("browser_download_url")
-            require(url == "https://github.com/$REPOSITORY/releases/download/$tag/Waypoint.apk") { "The update download is outside the trusted release channel." }
+            require(url == "https://github.com/$REPOSITORY/releases/download/$tag/Waypoint.apk") { tr("The update download is outside the trusted release channel.","הורדת העדכון היא מחוץ לערוץ הגרסאות המהימן.") }
             val digest = asset.optString("digest")
-            require(Regex("sha256:[a-fA-F0-9]{64}").matches(digest)) { "The release checksum is not ready. Try again shortly." }
+            require(Regex("sha256:[a-fA-F0-9]{64}").matches(digest)) { tr("The release checksum is not ready. Try again shortly.","סכום הביקורת של הגרסה עדיין לא מוכן. נסו שוב בקרוב.") }
             val size = asset.getLong("size")
-            require(size in 1..MAX_BYTES) { "The update has an invalid download size." }
+            require(size in 1..MAX_BYTES) { tr("The update has an invalid download size.","לעדכון יש גודל הורדה לא תקין.") }
             return ReleaseUpdate(version, code, url, digest.substringAfter(':').lowercase(), size, release.optString("body").take(5000))
         }
         fun trustedDownloadHost(url: String): Boolean = runCatching {

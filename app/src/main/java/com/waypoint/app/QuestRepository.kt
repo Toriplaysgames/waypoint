@@ -17,12 +17,12 @@ class QuestRepository(val database: QuestDatabase, private val time: QuestTimeSo
     val dao = database.quests()
 
     suspend fun save(draft: QuestRecord): QuestRecord = database.withTransaction {
-        val title = validQuestTitle(draft.title) ?: error("Give your quest a title of up to 160 characters.")
-        require(draft.notes.length <= 4000) { "Keep notes under 4,000 characters." }
-        require(draft.characterName.length <= 60) { "Keep the character name under 60 characters." }
-        require(draft.focusMinutes in 1..180) { "Choose a timer from 1 to 180 minutes." }
-        require(draft.latitude == null && draft.longitude == null || draft.place() != null) { "Choose a valid place for this quest." }
-        require(draft.imageName == null || QuestImages.isImageName(draft.imageName)) { "Choose the photo again." }
+        val title = validQuestTitle(draft.title) ?: error(tr("Give your quest a title of up to 160 characters.","תנו למשימה כותרת של עד 160 תווים."))
+        require(draft.notes.length <= 4000) { tr("Keep notes under 4,000 characters.","ההערות צריכות להיות קצרות מ-4,000 תווים.") }
+        require(draft.characterName.length <= 60) { tr("Keep the character name under 60 characters.","שם הדמות צריך להיות קצר מ-60 תווים.") }
+        require(draft.focusMinutes in 1..180) { tr("Choose a timer from 1 to 180 minutes.","בחרו טיימר של 1 עד 180 דקות.") }
+        require(draft.latitude == null && draft.longitude == null || draft.place() != null) { tr("Choose a valid place for this quest.","בחרו מקום תקין למשימה הזאת.") }
+        require(draft.imageName == null || QuestImages.isImageName(draft.imageName)) { tr("Choose the photo again.","בחרו את התמונה שוב.") }
         val existing = dao.quest(draft.id)
         val saved = draft.copy(title = title, notes = draft.notes.trim(), characterName = draft.characterName.trim(),
             completedAt = existing?.completedAt, focusQualified = existing?.focusQualified ?: false,
@@ -59,11 +59,11 @@ class QuestRepository(val database: QuestDatabase, private val time: QuestTimeSo
     }
 
     suspend fun startFocus(id: String, alerts: Boolean): FocusRecord = database.withTransaction {
-        val quest = dao.quest(id) ?: error("This quest is no longer available.")
-        check(quest.completedAt == null) { "Reopen this quest to start a timer." }
+        val quest = dao.quest(id) ?: error(tr("This quest is no longer available.","המשימה הזאת כבר לא זמינה."))
+        check(quest.completedAt == null) { tr("Reopen this quest to start a timer.","כדי להפעיל טיימר, פתחו את המשימה מחדש.") }
         reconcileFocusInTransaction()
         val previous = dao.focus()
-        check(previous == null || previous.status !in listOf("RUNNING", "PAUSED")) { "Finish your current focus session before starting another." }
+        check(previous == null || previous.status !in listOf("RUNNING", "PAUSED")) { tr("Finish your current focus session before starting another.","סיימו את זמן הריכוז הנוכחי לפני שמתחילים חדש.") }
         val now = time.now()
         val duration = quest.focusMinutes * 60_000L
         FocusRecord(questId = id, durationMs = duration, remainingMs = duration, startedElapsedMs = now.elapsed,
